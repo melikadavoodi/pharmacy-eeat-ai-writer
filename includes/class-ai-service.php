@@ -121,7 +121,24 @@ class Pharmacy_EEAT_AI_Service {
             'simple_public'        => 'بسیار ساده، عامه‌فهم، روان و داستان‌محور بدون هیچ اصطلاح گیج‌کننده پزشکی',
             'authoritative_leader' => 'مقتدر، قاطع، پرچمدار و پیشرو در صنعت داروسازی ایران با اعتمادبه‌نفس حداکثری'
         );
-        $selected_tone_desc = $tones_desc[$tone] ?? $tones_desc['medical_consultant'];
+
+        // Support for Multi-Tone / Hybrid Brand Voice
+        $selected_tones = is_array($tone) ? $tone : array_filter(array_map('trim', explode(',', (string)$tone)));
+        if (empty($selected_tones)) {
+            $selected_tones = array('medical_consultant');
+        }
+
+        $tones_text_arr = array();
+        foreach ($selected_tones as $t_key) {
+            if (isset($tones_desc[$t_key])) {
+                $tones_text_arr[] = $tones_desc[$t_key];
+            }
+        }
+        if (count($tones_text_arr) > 1) {
+            $selected_tone_desc = "لحن ترکیبی و چندگانه برند (Hybrid Brand Voice): لطفاً متن را با تلفیقی هماهنگ، طبیعی و هنرمندانه از این لحن‌ها بنویسید به طوری که ویژگی‌های هر دو لحن در متن حس شود:\n- " . implode("\n- همچنین: ", $tones_text_arr);
+        } else {
+            $selected_tone_desc = !empty($tones_text_arr) ? $tones_text_arr[0] : $tones_desc['medical_consultant'];
+        }
 
         // Brand Point of View (POV)
         $pov_desc = array(
