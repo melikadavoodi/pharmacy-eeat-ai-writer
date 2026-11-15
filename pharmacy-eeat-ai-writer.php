@@ -1,11 +1,11 @@
 <?php
 /**
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
- * Plugin URI: https://drdarabi.com
- * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با پشتیبانی از چند منبع علمی، تنظیم لحن و چت‌بات مراجع داروساز با هماهنگی کامل رنک‌مث و E-E-A-T.
- * Version: 2.5.0
+ * Plugin URI: https://drdarabipharmacy.com
+ * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با متدولوژی‌های GEO (هوش مصنوعی گوگل)، CRO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، اسکیما JSON-LD و پیوند داخلی هوشمند.
+ * Version: 3.0.0
  * Author: تیم سئو و هوش مصنوعی دارابی
- * Author URI: https://drdarabi.com
+ * Author URI: https://drdarabipharmacy.com
  * Text Domain: pharmacy-eeat-ai
  * Domain Path: /languages
  * GitHub Plugin URI: melikadavoodi/pharmacy-eeat-ai-writer
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '2.5.0');
+define('PHARMACY_EEAT_VERSION', '3.0.0');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
@@ -42,6 +42,7 @@ class Pharmacy_EEAT_Plugin {
         add_action('admin_menu', array($this, 'register_admin_menus'));
         add_action('admin_enqueue_scripts', array($this, 'enqueue_admin_assets'));
         add_action('wp_enqueue_scripts', array($this, 'enqueue_frontend_assets'));
+        add_action('wp_head', array($this, 'output_frontend_schema'), 20);
 
         // AJAX Hooks
         add_action('wp_ajax_pharmacy_ai_generate_article', array($this, 'ajax_generate_article'));
@@ -117,6 +118,25 @@ class Pharmacy_EEAT_Plugin {
     public function enqueue_frontend_assets() {
         if (is_singular()) {
             wp_add_inline_style('wp-block-library', '
+                .pharmacy-takeaways-box {
+                    background: #f8fafc;
+                    border: 1px solid #cbd5e1;
+                    border-right: 5px solid #0284c7;
+                    padding: 16px 20px;
+                    border-radius: 8px;
+                    margin: 20px 0;
+                    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+                }
+                .pharmacy-takeaways-box h4 {
+                    margin-top: 0;
+                    margin-bottom: 10px;
+                    color: #0369a1;
+                    font-size: 16px;
+                }
+                .pharmacy-takeaways-box ul {
+                    margin-bottom: 0;
+                    padding-right: 20px;
+                }
                 .pharmacy-eeat-reviewer-box {
                     background: #f0fdf4;
                     border-right: 4px solid #16a34a;
@@ -137,6 +157,23 @@ class Pharmacy_EEAT_Plugin {
                     line-height: 1.7;
                 }
             ');
+        }
+    }
+
+    public function output_frontend_schema() {
+        if (!is_singular()) {
+            return;
+        }
+
+        $post_id = get_the_ID();
+        if (!$post_id) {
+            return;
+        }
+
+        $schema_json = get_post_meta($post_id, '_pharmacy_ai_json_ld', true);
+        if (!empty($schema_json)) {
+            echo "\n<!-- Pharmacy AI Content Pro Structured Data (GEO / Schema.org) -->\n";
+            echo '<script type="application/ld+json">' . wp_unslash($schema_json) . "</script>\n";
         }
     }
 
@@ -165,6 +202,7 @@ class Pharmacy_EEAT_Plugin {
             'focus_keyword'   => sanitize_text_field($_POST['focus_keyword'] ?? ''),
             'word_count'      => intval($_POST['word_count'] ?? 1500),
             'tone'            => sanitize_text_field($_POST['tone'] ?? 'medical_consultant'),
+            'seo_strategy'    => sanitize_text_field($_POST['seo_strategy'] ?? 'geo_ai_search'),
             'target_audience' => sanitize_text_field($_POST['target_audience'] ?? 'general'),
         );
 
@@ -198,6 +236,10 @@ class Pharmacy_EEAT_Plugin {
         $rm_title   = sanitize_text_field($_POST['rank_math_title'] ?? '');
         $rm_desc    = sanitize_text_field($_POST['rank_math_desc'] ?? '');
         $rm_keyword = sanitize_text_field($_POST['rank_math_keyword'] ?? '');
+
+        $schema_json    = isset($_POST['schema_json']) ? wp_unslash($_POST['schema_json']) : '';
+        $internal_links = isset($_POST['internal_links']) ? wp_unslash($_POST['internal_links']) : '';
+        $scorecard      = isset($_POST['scorecard']) ? wp_unslash($_POST['scorecard']) : '';
 
         if (empty($title) || empty($content)) {
             wp_send_json_error('عنوان یا متن محتوا نمی‌تواند خالی باشد.');
@@ -252,6 +294,17 @@ class Pharmacy_EEAT_Plugin {
             update_post_meta($post_id, 'rank_math_focus_keyword', $rm_keyword);
         }
 
+        // Save Schema and Insights metadata
+        if (!empty($schema_json)) {
+            update_post_meta($post_id, '_pharmacy_ai_json_ld', $schema_json);
+        }
+        if (!empty($internal_links)) {
+            update_post_meta($post_id, '_pharmacy_ai_internal_links', $internal_links);
+        }
+        if (!empty($scorecard)) {
+            update_post_meta($post_id, '_pharmacy_ai_scorecard', $scorecard);
+        }
+
         wp_send_json_success(array(
             'post_id'     => $post_id,
             'is_update'   => ($existing_id > 0),
@@ -282,6 +335,7 @@ class Pharmacy_EEAT_Plugin {
             'focus_keyword'   => get_post_meta($post_id, 'rank_math_focus_keyword', true) ?: $post->post_title,
             'word_count'      => 800,
             'tone'            => 'commercial_buyer',
+            'seo_strategy'    => 'cro_conversion',
             'target_audience' => 'general',
         );
 
@@ -295,6 +349,7 @@ class Pharmacy_EEAT_Plugin {
         $rm_title          = $result['rank_math_title'] ?? '';
         $rm_desc           = $result['rank_math_description'] ?? '';
         $rm_keyword        = $result['rank_math_focus_keyword'] ?? '';
+        $schema_json       = isset($result['schema_json']) ? (is_array($result['schema_json']) ? wp_json_encode($result['schema_json'], JSON_UNESCAPED_UNICODE) : $result['schema_json']) : '';
 
         // Update database directly
         $update_data = array('ID' => $post_id);
@@ -315,13 +370,16 @@ class Pharmacy_EEAT_Plugin {
         if (!empty($rm_keyword)) {
             update_post_meta($post_id, 'rank_math_focus_keyword', $rm_keyword);
         }
+        if (!empty($schema_json)) {
+            update_post_meta($post_id, '_pharmacy_ai_json_ld', $schema_json);
+        }
 
         wp_send_json_success(array(
             'content'           => $content,
             'short_description' => $short_description,
             'rank_math_title'   => $rm_title,
             'rank_math_desc'    => $rm_desc,
-            'message'           => 'اطلاعات با موفقیت در باکس‌های محصول و رنک‌مث درج و ذخیره شد!'
+            'message'           => 'اطلاعات با متدولوژی هوشمند کپی‌رایتینگ و CRO با موفقیت در محصول و رنک‌مث ذخیره شد!'
         ));
     }
 
@@ -362,6 +420,7 @@ class Pharmacy_EEAT_Plugin {
             'topic'         => 'تولید متای سئو برای: ' . $post->post_title . "\nخلاصه متن:\n" . $summary,
             'focus_keyword' => get_post_meta($post_id, 'rank_math_focus_keyword', true),
             'word_count'    => 300,
+            'seo_strategy'  => 'geo_ai_search',
         );
 
         $result = Pharmacy_EEAT_AI_Service::generate_content($params);
