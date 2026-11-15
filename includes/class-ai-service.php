@@ -23,6 +23,8 @@ class Pharmacy_EEAT_AI_Service {
         $focus_keyword   = isset($params['focus_keyword']) ? sanitize_text_field($params['focus_keyword']) : '';
         $word_count      = isset($params['word_count']) ? intval($params['word_count']) : 1500;
         $tone            = isset($params['tone']) ? sanitize_text_field($params['tone']) : 'medical_consultant';
+        $brand_pov       = isset($params['brand_pov']) ? sanitize_text_field($params['brand_pov']) : 'first_plural';
+        $reading_level   = isset($params['reading_level']) ? sanitize_text_field($params['reading_level']) : 'general';
         $seo_strategy    = isset($params['seo_strategy']) ? sanitize_text_field($params['seo_strategy']) : 'geo_ai_search';
         $target_audience = isset($params['target_audience']) ? sanitize_text_field($params['target_audience']) : 'general';
 
@@ -48,7 +50,7 @@ class Pharmacy_EEAT_AI_Service {
             $fetched_sources_text = $source_text;
         }
 
-        $system_instruction = self::build_system_prompt($content_type, $tone, $seo_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt);
+        $system_instruction = self::build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt);
         $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $fetched_sources_text, $clean_urls);
 
         if ($api_provider === 'openrouter') {
@@ -108,14 +110,34 @@ class Pharmacy_EEAT_AI_Service {
         return mb_substr(trim($clean), 0, 10000);
     }
 
-    private static function build_system_prompt($content_type, $tone, $seo_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt) {
+    private static function build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt) {
         $tones_desc = array(
-            'medical_consultant' => 'مشاوره‌ای، دلسوزانه، علمی و قابل‌اعتماد داروخانه‌ای (همانند گفت‌وگوی صمیمی و تخصصی دکتر داروساز در داروخانه)',
-            'clinical_evidence'  => 'بسیار علمی، بالینی، دقیق و متکی بر کارآزمایی‌های بالینی رسمی (Evidence-Based Medicine)',
-            'commercial_buyer'   => 'ترغیب‌کننده، آگاهی‌بخش، شفاف‌ساز مزایا و راهنمای خرید هوشمندانه با تکیه بر اصالت و ایمنی داروخانه',
-            'simple_public'      => 'فوق‌العاده ساده، عامه‌فهم، بدون ابهام و بدون اصطلاحات گیج‌کننده پزشکی'
+            'medical_consultant'   => 'مشاوره‌ای، دلسوزانه و امین داروخانه‌ای (همانند گفت‌وگوی صمیمانه، گرم و اطمینان‌بخش دکتر داروساز پشت پیشخوان با بیمار)',
+            'clinical_evidence'    => 'بسیار علمی، بالینی، آکادمیک و متکی بر کارآزمایی‌های بالینی رسمی بدون مبالغه (Evidence-Based Medicine)',
+            'commercial_buyer'     => 'ترغیب‌کننده و راهنمای خرید هوشمندانه با تاکید بر ارزش خرید، اصالت کالا و تخفیف‌ها (Conversion CRO & AIDA)',
+            'beauty_aesthetic'     => 'زیبایی، لوکس، لطیف، امیدبخش و درماتولوژیک (مخصوص پوست، مو، کلاژن، جوانسازی و محصولات مراقبتی)',
+            'athletic_performance' => 'ورزشی، پرانرژی، انگیزشی و صریح (مخصوص مکمل‌های بدنسازی، آمینواسیدها، انرژی، توان و ریکاوری)',
+            'gentle_family'        => 'فوق‌العاده ملایم، آرامش‌بخش، محتاط و ایمن (مخصوص مکمل‌های بارداری، نوزادان، کودکان و سالمندان)',
+            'simple_public'        => 'بسیار ساده، عامه‌فهم، روان و داستان‌محور بدون هیچ اصطلاح گیج‌کننده پزشکی',
+            'authoritative_leader' => 'مقتدر، قاطع، پرچمدار و پیشرو در صنعت داروسازی ایران با اعتمادبه‌نفس حداکثری'
         );
         $selected_tone_desc = $tones_desc[$tone] ?? $tones_desc['medical_consultant'];
+
+        // Brand Point of View (POV)
+        $pov_desc = array(
+            'first_plural'   => 'اول‌شخص جمع: از طرف تیم علمی داروخانه دکتر دارابی صحبت کنید (مثال: «ما در داروخانه آنلاین دکتر دارابی همواره توصیه می‌کنیم...» یا «تیم داروسازان ما...»)',
+            'first_singular' => 'اول‌شخص مفرد: با لحن مستقیم دکتر داروساز به عنوان مشاور اختصاصی بیمار بنویسید (مثال: «من به عنوان دکتر داروساز به شما پیشنهاد می‌کنم...»)',
+            'third_neutral'  => 'سوم‌شخص بی‌طرف و دانای کل: لحن تحلیلی، بی‌طرف و علمی بدون ضمیر شخصی (مثال: «بررسی‌ها نشان می‌دهد این مکمل...»)'
+        );
+        $selected_pov_desc = $pov_desc[$brand_pov] ?? $pov_desc['first_plural'];
+
+        // Reading / Expertise Level
+        $level_desc = array(
+            'general'             => 'عمومی و کاربردی: تمام مفاهیم علمی را به ساده‌ترین زبان ممکن و بدون نیاز به دانش قبلی توضیح دهید.',
+            'semi_specialist'     => 'نیمه‌تخصصی: نام ترکیبات و مکانیزم‌های دارویی را با توضیح ساده فارسی در پرانتز بیاورید تا هم برای افراد آگاه و هم عموم مفید باشد.',
+            'clinical_specialist' => 'تخصصی بالینی و فارماکولوژیک: متنی عمیق با اصطلاحات دقیق پزشکی مناسب کادر درمان و بیماران پیگیر.'
+        );
+        $selected_level_desc = $level_desc[$reading_level] ?? $level_desc['general'];
 
         // SEO & Copywriting Strategy Directives
         $strategy_instructions = '';
@@ -159,7 +181,9 @@ class Pharmacy_EEAT_AI_Service {
 
 {$strategy_instructions}
 
-لحن نگارش: {$selected_tone_desc}.
+لحن و هویت برند (Brand Voice): {$selected_tone_desc}.
+زاویه دید راوی (Point of View): {$selected_pov_desc}.
+سطح تخصصی زبان (Language Level): {$selected_level_desc}.
 
 اصول ویرایشی و زبان فارسی (Persian Voice & Iranian Market Rules):
 ۱. تمام متن باید به زبان فارسی فاخر، شیوا، گرم و تخصصی نگارش شود.
