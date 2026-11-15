@@ -266,7 +266,7 @@ class Pharmacy_EEAT_Admin_Page {
 
         $provider       = get_option('pharmacy_ai_provider', 'openrouter');
         $api_key        = get_option('pharmacy_ai_api_key', '');
-        $model          = get_option('pharmacy_ai_model', 'google/gemini-flash-1.5');
+        $model          = get_option('pharmacy_ai_model', 'google/gemini-2.5-flash');
         $api_proxy      = get_option('pharmacy_ai_api_proxy', '');
         $reviewer_name  = get_option('pharmacy_ai_reviewer_name', 'دکتر داروساز');
         $reviewer_code  = get_option('pharmacy_ai_reviewer_code', '۱۲۳۴۵');
@@ -306,7 +306,7 @@ class Pharmacy_EEAT_Admin_Page {
                             <th scope="row"><label for="pharmacy_ai_model">مدل هوش مصنوعی:</label></th>
                             <td>
                                 <input type="text" name="pharmacy_ai_model" id="pharmacy_ai_model" value="<?php echo esc_attr($model); ?>" class="regular-text" dir="ltr">
-                                <p class="description">برای اوپن‌روتر: <code>google/gemini-flash-1.5</code> یا <code>google/gemini-2.0-flash-exp:free</code> | برای جمینای کلادفلر: <code>gemini-1.5-flash</code></p>
+                                <p class="description">برای اوپن‌روتر: <code>google/gemini-2.5-flash</code> یا <code>google/gemini-2.5-flash-lite</code> | برای جمینای کلادفلر: <code>gemini-1.5-flash</code></p>
                             </td>
                         </tr>
                         <tr id="row_api_proxy">
