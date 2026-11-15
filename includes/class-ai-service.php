@@ -195,6 +195,7 @@ class Pharmacy_EEAT_AI_Service {
             ),
             'response_format' => array('type' => 'json_object'),
             'temperature'     => 0.4,
+            'max_tokens'      => 4000,
         );
 
         $response = wp_remote_post($endpoint, array(
@@ -240,6 +241,7 @@ class Pharmacy_EEAT_AI_Service {
             'model'       => $model,
             'messages'    => $formatted,
             'temperature' => 0.6,
+            'max_tokens'  => 2000,
         );
 
         $response = wp_remote_post($endpoint, array(
@@ -391,6 +393,7 @@ class Pharmacy_EEAT_AI_Service {
             ),
             'response_format' => array('type' => 'json_object'),
             'temperature'     => 0.4,
+            'max_tokens'      => 4000,
         );
 
         $response = wp_remote_post($endpoint, array(
