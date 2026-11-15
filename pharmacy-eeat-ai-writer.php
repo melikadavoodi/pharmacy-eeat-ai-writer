@@ -3,7 +3,7 @@
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
  * Plugin URI: https://drdarabi.com
  * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با پشتیبانی از چند منبع علمی، تنظیم لحن و چت‌بات مراجع داروساز با هماهنگی کامل رنک‌مث و E-E-A-T.
- * Version: 2.4.0
+ * Version: 2.5.0
  * Author: تیم سئو و هوش مصنوعی دارابی
  * Author URI: https://drdarabi.com
  * Text Domain: pharmacy-eeat-ai
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '2.4.0');
+define('PHARMACY_EEAT_VERSION', '2.5.0');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
