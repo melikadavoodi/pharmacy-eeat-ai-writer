@@ -495,3 +495,43 @@
     height: auto !important;
     line-height: 1.8 !important;
 }
+
+
+/* Multi-Tone Brand Pills (v3.4.0) */
+.pharmacy-tone-pill-group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.tone-pill {
+    display: inline-flex;
+    align-items: center;
+    padding: 6px 14px;
+    border-radius: 20px;
+    border: 1px solid #d8b4fe;
+    background: #fff;
+    color: #581c87;
+    font-size: 13px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    user-select: none;
+}
+
+.tone-pill input[type="checkbox"] {
+    margin-left: 6px;
+    accent-color: #7c3aed;
+}
+
+.tone-pill:hover {
+    background: #f3e8ff;
+    border-color: #c084fc;
+}
+
+.tone-pill.active {
+    background: #7c3aed;
+    color: #fff;
+    border-color: #6d28d9;
+    box-shadow: 0 2px 6px rgba(124, 58, 237, 0.25);
+}
