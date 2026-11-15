@@ -11,7 +11,7 @@ class Pharmacy_EEAT_AI_Service {
         $model        = get_option('pharmacy_ai_model', 'gemini-1.5-flash');
 
         if (empty($api_key)) {
-            return new WP_Error('missing_key', 'کلید ای‌پی‌آی (API Key) در تنظیمات افزونه ثبت نشده است. لطفاً ابتدا به منوی تنظیمات هوش مصنوعی بروید.');
+            return new WP_Error('missing_key', 'کلید API در تنظیمات افزونه ثبت نشده است. لطفاً ابتدا به منوی "تنظیمات و E-E-A-T" بروید.');
         }
 
         $content_type  = isset($params['content_type']) ? sanitize_text_field($params['content_type']) : 'blog_post';
@@ -112,24 +112,16 @@ class Pharmacy_EEAT_AI_Service {
 
         $type_instructions = '';
         if ($content_type === 'product') {
-            $type_instructions = "نوع محتوا: توضیحات جامع صفحه محصول دارویی/مکمل (WooCommerce Product Page).
-ساختار الزامی محتوا:
-۱. معرفی اجمالی و ویژگی‌های کلیدی محصول (Bullet points).
-۲. جدول ترکیبات و ارزش تغذیه‌ای/دارویی (HTML Table).
-۳. نحوه و بهترین زمان مصرف.
-۴. هشدارهای مصرف، منع مصرف و تداخل با داروهای دیگر.
-۵. پرسش‌های متداول خریداران (FAQ).";
+            $type_instructions = "نوع محتوا: توضیحات صفحه محصول دارویی/مکمل فروشگاهی (WooCommerce Product Page).
+وظیفه ویژه شما:
+۱. تولید فیلد 'short_description': متن معرفی کوتاه و فهرست ویژگی‌های شاخص محصول (Bullet points شامل ترکیبات اصلی، فواید برجسته و ساخت کشور/برند) برای قرارگیری در باکس ویژگی‌های محصول ووکامرس.
+۲. تولید فیلد 'content': توضیحات کامل و جامع محصول شامل معرفی، جدول دقیق ترکیبات و دوز (HTML Table)، نحوه و زمان مصرف، هشدارهای منع مصرف، تداخلات دارویی و پرسش‌های متداول خریداران (FAQ).";
         } elseif ($content_type === 'category') {
             $type_instructions = "نوع محتوا: متن لندینگ یا توضیحات دسته‌بندی فروشگاه داروخانه (Taxonomy / Category Description).
-ساختار الزامی محتوا:
-۱. مقدمه راهنمای دسته‌بندی و معرفی کاربرد کلی این دسته محصولات.
-۲. نکات کلیدی در انتخاب بهترین گزینه بر اساس سن، جنسیت و شرایط فرد.
-۳. سوالات متداول کاربران در این دسته‌بندی.
-۴. محتوا باید متمرکز بر سئو و راهنمای خرید بدون اطناب بی‌مورد باشد.";
+شامل راهنمای جامع خرید، معرفی کاربرد دسته، معیارهای انتخاب بر اساس سن/جنسیت و سوالات متداول.";
         } else {
             $type_instructions = "نوع محتوا: مقاله جامع وبلاگ پزشکی و دارویی (Blog Post).
-ساختار الزامی:
-مقدمه، مکانیسم اثر، موارد مصرف، دوز و نحوه مصرف، عوارض جانبی تفکیک‌شده (شایع/نادر)، تداخلات دارویی مهم، منع مصرف و هشدارهای بارداری، سوالات متداول با پاسخ دقیق.";
+شامل مقدمه، مکانیسم اثر، موارد مصرف، دوز و نحوه مصرف، عوارض جانبی تفکیک‌شده (شایع/نادر)، تداخلات دارویی، منع مصرف، هشدارهای بارداری و سوالات متداول.";
         }
 
         return "شما یک متخصص ارشد داروسازی بالینی، نویسنده محتوای پزشکی، و کارشناس ارشد سئو رنک‌مث (Rank Math) و استانداردهای گوگل E-E-A-T هستید.
@@ -153,6 +145,7 @@ class Pharmacy_EEAT_AI_Service {
 خروجی شما باید منحصراً و بدون هیچ متن یا کدهای اضافی، یک شیء JSON با ساختار زیر باشد:
 {
   \"title\": \"عنوان صفحه یا محصول\",
+  \"short_description\": \"معرفی ویژگی‌های کلیدی، فواید برجسته و نکات شاخص برای باکس ویژگی‌های محصول ووکامرس (HTML list ul/li)\",
   \"rank_math_title\": \"عنوان سئو رنک‌مث\",
   \"rank_math_description\": \"توضیحات متای رنک‌مث\",
   \"rank_math_focus_keyword\": \"کلمه کلیدی کانونی\",
@@ -188,6 +181,13 @@ class Pharmacy_EEAT_AI_Service {
     private static function call_gemini($api_key, $model, $system_instruction, $user_prompt) {
         $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$api_key}";
 
+        $safety_settings = array(
+            array('category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_NONE'),
+            array('category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_NONE'),
+            array('category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_NONE'),
+            array('category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_NONE'),
+        );
+
         $body_data = array(
             'system_instruction' => array(
                 'parts' => array(
@@ -201,9 +201,11 @@ class Pharmacy_EEAT_AI_Service {
                     )
                 )
             ),
+            'safetySettings' => $safety_settings,
             'generationConfig' => array(
                 'response_mime_type' => 'application/json',
                 'temperature'        => 0.4,
+                'maxOutputTokens'    => 8192,
             )
         );
 
@@ -214,22 +216,43 @@ class Pharmacy_EEAT_AI_Service {
         ));
 
         if (is_wp_error($response)) {
-            return new WP_Error('api_error', 'خطا در ارتباط با جمینای: ' . $response->get_error_message());
+            return new WP_Error('api_error', 'خطا در ارتباط با سرور جمینای: ' . $response->get_error_message());
         }
 
+        $code = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
-        if (isset($data['error'])) {
-            return new WP_Error('gemini_error', 'خطای ای‌پی‌آی جمینای: ' . ($data['error']['message'] ?? 'نامشخص'));
+        if ($code !== 200) {
+            $err_msg = isset($data['error']['message']) ? $data['error']['message'] : "کد وضعیت HTTP: {$code}";
+            return new WP_Error('gemini_error', 'خطای ای‌پی‌آی جمینای: ' . $err_msg);
+        }
+
+        if (isset($data['candidates'][0]['finishReason']) && $data['candidates'][0]['finishReason'] === 'SAFETY') {
+            return new WP_Error('gemini_safety', 'پاسخ توسط فیلتر ایمنی جمینای مسدود شد. لطفاً موضوع را کمی تعدیل کنید.');
         }
 
         $raw_text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
+        if (empty($raw_text)) {
+            // Check promptFeedback
+            if (isset($data['promptFeedback']['blockReason'])) {
+                return new WP_Error('gemini_blocked', 'درخواست به دلیل ' . $data['promptFeedback']['blockReason'] . ' مسدود شد.');
+            }
+            return new WP_Error('empty_result', 'پاسخ خالی از جمینای دریافت شد. لطفاً مدل دیگری را از تنظیمات انتخاب کنید.');
+        }
+
         return self::parse_json_result($raw_text);
     }
 
     private static function call_gemini_chat($api_key, $model, $system_prompt, $messages) {
         $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$api_key}";
+
+        $safety_settings = array(
+            array('category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_NONE'),
+            array('category' => 'HARM_CATEGORY_HATE_SPEECH', 'threshold' => 'BLOCK_NONE'),
+            array('category' => 'HARM_CATEGORY_SEXUALLY_EXPLICIT', 'threshold' => 'BLOCK_NONE'),
+            array('category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_NONE'),
+        );
 
         $contents = array();
         foreach ($messages as $msg) {
@@ -245,6 +268,7 @@ class Pharmacy_EEAT_AI_Service {
                 'parts' => array(array('text' => $system_prompt))
             ),
             'contents' => $contents,
+            'safetySettings' => $safety_settings,
             'generationConfig' => array(
                 'temperature' => 0.6,
             )
@@ -297,11 +321,13 @@ class Pharmacy_EEAT_AI_Service {
             return new WP_Error('api_error', 'خطا در ارتباط با اوپن‌ای‌آی: ' . $response->get_error_message());
         }
 
+        $code = wp_remote_retrieve_response_code($response);
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
-        if (isset($data['error'])) {
-            return new WP_Error('openai_error', 'خطای اوپن‌ای‌آی: ' . ($data['error']['message'] ?? 'نامشخص'));
+        if ($code !== 200) {
+            $err_msg = isset($data['error']['message']) ? $data['error']['message'] : "کد وضعیت HTTP: {$code}";
+            return new WP_Error('openai_error', 'خطای ای‌پی‌آی اوپن‌ای‌آی: ' . $err_msg);
         }
 
         $raw_text = $data['choices'][0]['message']['content'] ?? '';
@@ -359,7 +385,7 @@ class Pharmacy_EEAT_AI_Service {
 
         $parsed = json_decode($clean_json, true);
         if (!$parsed || !isset($parsed['content'])) {
-            return new WP_Error('invalid_json', 'پاسخ هوش مصنوعی در قالب استاندارد نبود.');
+            return new WP_Error('invalid_json', 'پاسخ هوش مصنوعی در قالب استاندارد نبود. متن دریافتی: ' . mb_substr($raw_text, 0, 100));
         }
 
         return $parsed;

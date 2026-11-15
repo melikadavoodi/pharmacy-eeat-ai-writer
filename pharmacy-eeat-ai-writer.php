@@ -3,7 +3,7 @@
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
  * Plugin URI: https://drdarabi.com
  * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با پشتیبانی از چند منبع علمی، تنظیم لحن و چت‌بات مراجع داروساز با هماهنگی کامل رنک‌مث و E-E-A-T.
- * Version: 2.1.0
+ * Version: 2.2.0
  * Author: تیم سئو و هوش مصنوعی دارابی
  * Author URI: https://drdarabi.com
  * Text Domain: pharmacy-eeat-ai
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '2.1.0');
+define('PHARMACY_EEAT_VERSION', '2.2.0');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
@@ -48,6 +48,7 @@ class Pharmacy_EEAT_Plugin {
         add_action('wp_ajax_pharmacy_ai_save_draft', array($this, 'ajax_save_draft'));
         add_action('wp_ajax_pharmacy_ai_optimize_meta', array($this, 'ajax_optimize_meta'));
         add_action('wp_ajax_pharmacy_ai_chat', array($this, 'ajax_chat'));
+        add_action('wp_ajax_pharmacy_ai_product_quick_action', array($this, 'ajax_product_quick_action'));
 
         // Init Metabox
         Pharmacy_EEAT_Metabox::init();
@@ -183,10 +184,16 @@ class Pharmacy_EEAT_Plugin {
             wp_send_json_error('دسترسی مجاز نیست.');
         }
 
-        $content_type = sanitize_text_field($_POST['content_type'] ?? 'blog_post');
-        $title   = sanitize_text_field($_POST['title'] ?? '');
-        $content = wp_kses_post($_POST['content'] ?? '');
-        $excerpt = sanitize_textarea_field($_POST['excerpt'] ?? '');
+        $content_type      = sanitize_text_field($_POST['content_type'] ?? 'blog_post');
+        $target_product    = sanitize_text_field($_POST['target_product'] ?? '');
+        $title             = sanitize_text_field($_POST['title'] ?? '');
+        $content           = wp_kses_post($_POST['content'] ?? '');
+        $short_description = wp_kses_post($_POST['short_description'] ?? '');
+        $excerpt           = sanitize_textarea_field($_POST['excerpt'] ?? '');
+
+        if (!empty($short_description)) {
+            $excerpt = $short_description;
+        }
 
         $rm_title   = sanitize_text_field($_POST['rank_math_title'] ?? '');
         $rm_desc    = sanitize_text_field($_POST['rank_math_desc'] ?? '');
@@ -196,18 +203,39 @@ class Pharmacy_EEAT_Plugin {
             wp_send_json_error('عنوان یا متن محتوا نمی‌تواند خالی باشد.');
         }
 
-        $post_type = ($content_type === 'product' && post_type_exists('product')) ? 'product' : 'post';
+        // If user entered a target product ID or URL, update existing post
+        $existing_id = 0;
+        if (!empty($target_product)) {
+            if (is_numeric($target_product)) {
+                $existing_id = intval($target_product);
+            } else {
+                $existing_id = url_to_postid($target_product);
+            }
+        }
 
-        $post_data = array(
-            'post_title'   => $title,
-            'post_content' => $content,
-            'post_excerpt' => $excerpt,
-            'post_status'  => 'draft',
-            'post_type'    => $post_type,
-            'post_author'  => get_current_user_id(),
-        );
-
-        $post_id = wp_insert_post($post_data);
+        if ($existing_id > 0 && get_post($existing_id)) {
+            $update_data = array(
+                'ID'           => $existing_id,
+                'post_content' => $content,
+                'post_excerpt' => $excerpt,
+            );
+            if (!empty($title)) {
+                $update_data['post_title'] = $title;
+            }
+            wp_update_post($update_data);
+            $post_id = $existing_id;
+        } else {
+            $post_type = ($content_type === 'product' && post_type_exists('product')) ? 'product' : 'post';
+            $post_data = array(
+                'post_title'   => $title,
+                'post_content' => $content,
+                'post_excerpt' => $excerpt,
+                'post_status'  => 'draft',
+                'post_type'    => $post_type,
+                'post_author'  => get_current_user_id(),
+            );
+            $post_id = wp_insert_post($post_data);
+        }
 
         if (is_wp_error($post_id)) {
             wp_send_json_error($post_id->get_error_message());
@@ -226,8 +254,74 @@ class Pharmacy_EEAT_Plugin {
 
         wp_send_json_success(array(
             'post_id'     => $post_id,
+            'is_update'   => ($existing_id > 0),
             'edit_url'    => admin_url('post.php?post=' . $post_id . '&action=edit'),
-            'preview_url' => get_preview_post_link($post_id),
+            'preview_url' => get_permalink($post_id) ?: get_preview_post_link($post_id),
+        ));
+    }
+
+    public function ajax_product_quick_action() {
+        check_ajax_referer('pharmacy_ai_nonce', 'nonce');
+
+        $post_id = intval($_POST['post_id'] ?? 0);
+        $action_type = sanitize_text_field($_POST['action_type'] ?? 'all');
+
+        if (!$post_id || !current_user_can('edit_post', $post_id)) {
+            wp_send_json_error('دسترسی نامعتبر است.');
+        }
+
+        $post = get_post($post_id);
+        if (!$post) {
+            wp_send_json_error('محصول یافت نشد.');
+        }
+
+        $params = array(
+            'content_type'    => 'product',
+            'mode'            => 'topic',
+            'topic'           => $post->post_title,
+            'focus_keyword'   => get_post_meta($post_id, 'rank_math_focus_keyword', true) ?: $post->post_title,
+            'word_count'      => 800,
+            'tone'            => 'commercial_buyer',
+            'target_audience' => 'general',
+        );
+
+        $result = Pharmacy_EEAT_AI_Service::generate_content($params);
+        if (is_wp_error($result)) {
+            wp_send_json_error($result->get_error_message());
+        }
+
+        $content           = $result['content'] ?? '';
+        $short_description = $result['short_description'] ?? ($result['excerpt'] ?? '');
+        $rm_title          = $result['rank_math_title'] ?? '';
+        $rm_desc           = $result['rank_math_description'] ?? '';
+        $rm_keyword        = $result['rank_math_focus_keyword'] ?? '';
+
+        // Update database directly
+        $update_data = array('ID' => $post_id);
+        if ($action_type === 'all' || $action_type === 'desc') {
+            $update_data['post_content'] = $content;
+        }
+        if ($action_type === 'all' || $action_type === 'features') {
+            $update_data['post_excerpt'] = $short_description;
+        }
+        wp_update_post($update_data);
+
+        if (!empty($rm_title)) {
+            update_post_meta($post_id, 'rank_math_title', $rm_title);
+        }
+        if (!empty($rm_desc)) {
+            update_post_meta($post_id, 'rank_math_description', $rm_desc);
+        }
+        if (!empty($rm_keyword)) {
+            update_post_meta($post_id, 'rank_math_focus_keyword', $rm_keyword);
+        }
+
+        wp_send_json_success(array(
+            'content'           => $content,
+            'short_description' => $short_description,
+            'rank_math_title'   => $rm_title,
+            'rank_math_desc'    => $rm_desc,
+            'message'           => 'اطلاعات با موفقیت در باکس‌های محصول و رنک‌مث درج و ذخیره شد!'
         ));
     }
 

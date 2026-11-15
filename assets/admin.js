@@ -11,15 +11,21 @@ jQuery(document).ready(function ($) {
         if (val === 'product') {
             $('#pharmacy_words').val('800');
             $('#pharmacy_tone').val('commercial_buyer');
-            $('#pharmacy_topic').attr('placeholder', 'مثال: کپسول زینک پلاس ۱۰ میلی‌گرم یوروویتال (۶۰ عددی)');
+            $('#pharmacy_topic').attr('placeholder', 'مثال: کپسول کلاژن پلاس ال لیزین یوروویتال (۶۰ عددی)');
+            $('#existing_product_row').slideDown(250);
+            $('#res_features_box').show();
         } else if (val === 'category') {
             $('#pharmacy_words').val('800');
             $('#pharmacy_tone').val('commercial_buyer');
-            $('#pharmacy_topic').attr('placeholder', 'مثال: مکمل‌های تقویت سیستم ایمنی و سرماخوردگی');
+            $('#pharmacy_topic').attr('placeholder', 'مثال: مکمل‌های تقویت پوست، مو و ناخن');
+            $('#existing_product_row').slideUp(250);
+            $('#res_features_box').hide();
         } else {
             $('#pharmacy_words').val('1500');
             $('#pharmacy_tone').val('medical_consultant');
-            $('#pharmacy_topic').attr('placeholder', 'مثال: قرص فاموتیدین؛ موارد مصرف، دوز و عوارض جانبی');
+            $('#pharmacy_topic').attr('placeholder', 'مثال: کپسول گاباپنتین؛ موارد مصرف، دوز و عوارض جانبی');
+            $('#existing_product_row').slideUp(250);
+            $('#res_features_box').hide();
         }
     });
 
@@ -65,7 +71,7 @@ jQuery(document).ready(function ($) {
         }
     }
 
-    // Generate Article AJAX
+    // Generate Article / Product AJAX
     $('#pharmacy-ai-generate-form').on('submit', function (e) {
         e.preventDefault();
 
@@ -101,6 +107,7 @@ jQuery(document).ready(function ($) {
                     $('#res_rank_math_title').val(d.rank_math_title || d.title || '');
                     $('#res_rank_math_desc').val(d.rank_math_description || d.excerpt || '');
                     $('#res_rank_math_keyword').val(d.rank_math_focus_keyword || $('#pharmacy_keyword').val() || '');
+                    $('#res_short_description').val(d.short_description || d.excerpt || '');
                     $('#res_post_excerpt').val(d.excerpt || '');
                     $('#res_post_content').val(d.content || '');
                     $('#res_content_preview').html(d.content || '');
@@ -132,23 +139,25 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    // Save Directly to Draft AJAX
+    // Save Directly to Draft or Update Existing Product AJAX
     $('#pharmacy-save-draft-btn').on('click', function () {
         var $btn = $(this);
         var postTitle = $('#res_post_title').val();
         var postContent = $('#res_post_content').val();
+        var shortDesc = $('#res_short_description').val();
         var postExcerpt = $('#res_post_excerpt').val();
         var rmTitle = $('#res_rank_math_title').val();
         var rmDesc = $('#res_rank_math_desc').val();
         var rmKeyword = $('#res_rank_math_keyword').val();
         var contentType = $('#pharmacy_content_type').val();
+        var targetProduct = $('#pharmacy_target_product').val();
 
         if (!postTitle || !postContent) {
             alert('عنوان یا متن محتوا خالی است!');
             return;
         }
 
-        $btn.prop('disabled', true).text('در حال ذخیره در پیش‌نویس‌های وردپرس...');
+        $btn.prop('disabled', true).text('در حال ذخیره / به‌روزرسانی...');
 
         $.ajax({
             url: pharmacyAiData.ajax_url,
@@ -157,8 +166,10 @@ jQuery(document).ready(function ($) {
                 action: 'pharmacy_ai_save_draft',
                 nonce: pharmacyAiData.nonce,
                 content_type: contentType,
+                target_product: targetProduct,
                 title: postTitle,
                 content: postContent,
+                short_description: shortDesc,
                 excerpt: postExcerpt,
                 rank_math_title: rmTitle,
                 rank_math_desc: rmDesc,
@@ -166,23 +177,91 @@ jQuery(document).ready(function ($) {
             },
             success: function (res) {
                 if (res.success && res.data.edit_url) {
-                    $btn.text('با موفقیت ذخیره شد!').css('background', '#166534');
+                    var successMsg = res.data.is_update ? 'محصول موجود با موفقیت به‌روزرسانی شد!' : 'محتوا با موفقیت ذخیره شد!';
+                    $btn.text('با موفقیت انجام شد!').css('background', '#166534');
                     var notice = '<div class="notice notice-success inline" style="margin-top: 15px; padding: 12px; border-radius: 8px;">' +
-                        '<p><strong>نوشته با موفقیت ذخیره شد و فیلدهای متای رنک‌مث ست گردید!</strong></p>' +
-                        '<p><a href="' + res.data.edit_url + '" class="button button-primary" target="_blank">ویرایش در ادیتور وردپرس</a> ' +
-                        '<a href="' + res.data.preview_url + '" class="button button-secondary" target="_blank">مشاهده پیش‌نمایش</a></p>' +
+                        '<p><strong>' + successMsg + '</strong></p>' +
+                        '<p><a href="' + res.data.edit_url + '" class="button button-primary" target="_blank">رفتن مستقیم به ویرایش محصول در ووکامرس</a> ' +
+                        '<a href="' + res.data.preview_url + '" class="button button-secondary" target="_blank">مشاهده محصول در سایت</a></p>' +
                         '</div>';
                     $('#pharmacy-result-container').prepend(notice);
                 } else {
-                    $btn.prop('disabled', false).text('ذخیره مستقیم در پیش‌نویس‌های وردپرس');
-                    alert('خطا در ذخیره نوشته: ' + (res.data ? res.data : 'ناشناخته'));
+                    $btn.prop('disabled', false).text('ذخیره / به‌روزرسانی مستقیم');
+                    alert('خطا در ذخیره: ' + (res.data ? res.data : 'ناشناخته'));
                 }
             },
             error: function () {
-                $btn.prop('disabled', false).text('ذخیره مستقیم در پیش‌نویس‌های وردپرس');
+                $btn.prop('disabled', false).text('ذخیره / به‌روزرسانی مستقیم');
                 alert('خطا در ارتباط با سرور.');
             }
         });
+    });
+
+    // Single Product Edit Screen Quick Actions
+    function handleProductQuickAction(postId, actionType, btnSelector) {
+        var $btn = $(btnSelector);
+        var originalText = $btn.text();
+        var $status = $('#pharmacy-quick-status');
+        $btn.prop('disabled', true).text('در حال تولید با هوش مصنوعی...');
+        $status.show().text('لطفاً چند ثانیه صبر کنید...').css('color', '#0284c7');
+
+        $.ajax({
+            url: pharmacyAiData.ajax_url,
+            type: 'POST',
+            data: {
+                action: 'pharmacy_ai_product_quick_action',
+                nonce: pharmacyAiData.nonce,
+                post_id: postId,
+                action_type: actionType
+            },
+            success: function (res) {
+                $btn.prop('disabled', false).text(originalText);
+                if (res.success && res.data) {
+                    var d = res.data;
+                    $status.text(d.message || 'انجام شد! صفحه را ذخیره/بروزرسانی کنید.').css('color', '#166534');
+
+                    // If Classic TinyMCE editor is present, insert content directly
+                    if (d.content && typeof tinyMCE !== 'undefined' && tinyMCE.get('content')) {
+                        tinyMCE.get('content').setContent(d.content);
+                    } else if (d.content && $('#content').length) {
+                        $('#content').val(d.content);
+                    }
+
+                    // Short Description / Excerpt box in WooCommerce
+                    if (d.short_description && typeof tinyMCE !== 'undefined' && tinyMCE.get('excerpt')) {
+                        tinyMCE.get('excerpt').setContent(d.short_description);
+                    } else if (d.short_description && $('#excerpt').length) {
+                        $('#excerpt').val(d.short_description);
+                    }
+
+                    // Rank Math inputs if present on page
+                    if (d.rank_math_title && $('#rank_math_title').length) {
+                        $('#rank_math_title').val(d.rank_math_title);
+                    }
+                    if (d.rank_math_desc && $('#rank_math_description').length) {
+                        $('#rank_math_description').val(d.rank_math_desc);
+                    }
+
+                    alert('اطلاعات با موفقیت تولید و در باکس‌های محصول درج شد. برای نهایی شدن روی دکمه به‌روزرسانی کلیک کنید.');
+                } else {
+                    $status.text('خطا: ' + (res.data || 'ناشناخته')).css('color', '#dc2626');
+                }
+            },
+            error: function () {
+                $btn.prop('disabled', false).text(originalText);
+                $status.text('خطا در ارتباط با سرور.').css('color', '#dc2626');
+            }
+        });
+    }
+
+    $('#btn-quick-fill-all-product').on('click', function () {
+        handleProductQuickAction($(this).data('post-id'), 'all', '#btn-quick-fill-all-product');
+    });
+    $('#btn-quick-desc-product').on('click', function () {
+        handleProductQuickAction($(this).data('post-id'), 'desc', '#btn-quick-desc-product');
+    });
+    $('#btn-quick-features-product').on('click', function () {
+        handleProductQuickAction($(this).data('post-id'), 'features', '#btn-quick-features-product');
     });
 
     // ChatBot Logic (PharmaBot)
@@ -191,14 +270,12 @@ jQuery(document).ready(function ($) {
     function sendChatMessage(text) {
         if (!text.trim()) return;
 
-        // Append user msg to UI
         $('#pharmacy-chat-box').append('<div class="chat-msg user-msg"><p>' + escapeHtml(text) + '</p></div>');
         $('#pharmacy-chat-input').val('');
         scrollChatToBottom();
 
         chatHistory.push({ role: 'user', content: text });
 
-        // Add loading bot message
         var $loadingMsg = $('<div class="chat-msg bot-msg loading"><p>در حال جستجو و بررسی مراجع...</p></div>');
         $('#pharmacy-chat-box').append($loadingMsg);
         scrollChatToBottom();

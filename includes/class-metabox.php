@@ -12,23 +12,40 @@ class Pharmacy_EEAT_Metabox {
     public static function add_meta_box() {
         add_meta_box(
             'pharmacy_eeat_quick_tools',
-            'دستیار پزشکی هوش مصنوعی (رنک‌مث و E-E-A-T)',
+            'دستیار هوش مصنوعی داروخانه (رنک‌مث، محتوا و ویژگی‌ها)',
             array(__CLASS__, 'render_box'),
-            array('post', 'page'),
+            array('post', 'page', 'product'),
             'side',
             'high'
         );
     }
 
     public static function render_box($post) {
-        $reviewer_name = get_option('pharmacy_ai_reviewer_name', 'دکتر داروساز');
-        $reviewer_code = get_option('pharmacy_ai_reviewer_code', '۱۲۳۴۵');
+        $is_product = ($post->post_type === 'product');
         ?>
         <div class="pharmacy-metabox-content" dir="rtl">
-            <p style="font-size: 13px; color: #555;">ابزارهای سریع هوش مصنوعی برای ارتقای سئو و اعتبار مقاله جاری:</p>
+            <?php if ($is_product) : ?>
+                <p style="font-size: 13px; color: #166534; font-weight: bold; margin-top: 0;">
+                    <span class="dashicons dashicons-cart" style="vertical-align: middle;"></span> دستیار هوشمند محصول ووکامرس:
+                </p>
+
+                <button type="button" class="button button-primary pharmacy-quick-btn" id="btn-quick-fill-all-product" data-post-id="<?php echo esc_attr($post->ID); ?>" style="width: 100%; margin-bottom: 8px; text-align: center; background: #00a389; border-color: #008f77;">
+                    <span class="dashicons dashicons-superhero" style="vertical-align: middle;"></span> تولید یکجای همه بخش‌ها (توضیحات + ویژگی‌ها + رنک‌مث)
+                </button>
+
+                <button type="button" class="button button-secondary pharmacy-quick-btn" id="btn-quick-desc-product" data-post-id="<?php echo esc_attr($post->ID); ?>" style="width: 100%; margin-bottom: 8px; text-align: right;">
+                    <span class="dashicons dashicons-editor-alignright" style="vertical-align: middle;"></span> تولید و درج در توضیحات کامل محصول
+                </button>
+
+                <button type="button" class="button button-secondary pharmacy-quick-btn" id="btn-quick-features-product" data-post-id="<?php echo esc_attr($post->ID); ?>" style="width: 100%; margin-bottom: 8px; text-align: right;">
+                    <span class="dashicons dashicons-editor-ul" style="vertical-align: middle;"></span> تولید و درج در باکس معرفی ویژگی‌های محصول
+                </button>
+            <?php endif; ?>
+
+            <p style="font-size: 12.5px; color: #555; margin-bottom: 6px;">ابزارهای سئو و اعتبارسنجی:</p>
 
             <button type="button" class="button button-secondary pharmacy-quick-btn" id="btn-quick-meta-gen" data-post-id="<?php echo esc_attr($post->ID); ?>" style="width: 100%; margin-bottom: 8px; text-align: right;">
-                <span class="dashicons dashicons-search" style="vertical-align: middle;"></span> تولید متای سئو برای رنک‌مث
+                <span class="dashicons dashicons-search" style="vertical-align: middle;"></span> تنظیم متای سئو برای رنک‌مث
             </button>
 
             <button type="button" class="button button-secondary pharmacy-quick-btn" id="btn-insert-reviewer" style="width: 100%; margin-bottom: 8px; text-align: right;">

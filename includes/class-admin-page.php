@@ -11,7 +11,7 @@ class Pharmacy_EEAT_Admin_Page {
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header">
                 <h1>استودیوی فوق‌پیشرفته هوش مصنوعی داروخانه (Content AI Pro)</h1>
-                <p class="pharmacy-ai-sub">تولید تخصصی مقالات بلاگ، صفحات محصول ووکامرس، توضیحات دسته‌بندی و چت‌بات مراجع علمی پزشکی با هماهنگی رنک‌مث</p>
+                <p class="pharmacy-ai-sub">تولید تخصصی مقالات بلاگ، صفحات محصول ووکامرس (توضیحات و ویژگی‌ها)، توضیحات دسته‌بندی و چت‌بات مراجع علمی پزشکی با هماهنگی رنک‌مث</p>
             </div>
 
             <?php if (empty($api_key)) : ?>
@@ -33,7 +33,7 @@ class Pharmacy_EEAT_Admin_Page {
                             </label>
                             <label class="type-pill">
                                 <input type="radio" name="content_type_choice" value="product">
-                                <span class="dashicons dashicons-cart"></span> صفحه محصول دارویی/مکمل
+                                <span class="dashicons dashicons-cart"></span> صفحه محصول دارویی/مکمل (ووکامرس)
                             </label>
                             <label class="type-pill">
                                 <input type="radio" name="content_type_choice" value="category">
@@ -52,12 +52,21 @@ class Pharmacy_EEAT_Admin_Page {
                             <input type="hidden" name="content_type" id="pharmacy_content_type" value="blog_post">
                             <input type="hidden" name="mode" id="pharmacy_mode" value="topic">
 
+                            <!-- Optional Existing Product Link/ID Field -->
+                            <div class="pharmacy-field" id="existing_product_row" style="display: none; background: #f0fdf4; padding: 14px 16px; border-radius: 8px; border: 1px dashed #16a34a; margin-bottom: 20px;">
+                                <label for="pharmacy_target_product" style="color: #166534;">
+                                    <span class="dashicons dashicons-admin-links" style="vertical-align: middle;"></span> اتصال به محصول موجود در سایت (جهت درج خودکار در باکس توضیحات و ویژگی‌ها):
+                                </label>
+                                <input type="text" id="pharmacy_target_product" name="target_product" placeholder="شناسه محصول (مثال: 3165) یا لینک محصول را وارد کنید (اختیاری)" class="regular-text" style="background:#fff;">
+                                <small style="color: #15803d;">اگر شناسه محصول را وارد کنید، اطلاعات به طور خودکار مستقیماً در باکس توضیحات و باکس ویژگی‌های همان محصول ذخیره می‌شود.</small>
+                            </div>
+
                             <!-- Tab 1: Topic -->
                             <div class="pharmacy-tab-content active" id="tab-topic">
                                 <div class="pharmacy-field">
                                     <label for="pharmacy_topic">نام دارو، مکمل، بیماری یا کلمه کلیدی اصلی: <span class="req">*</span></label>
-                                    <input type="text" id="pharmacy_topic" name="topic" placeholder="مثال: قرص فاموتیدین؛ موارد مصرف، دوز و عوارض جانبی" class="regular-text">
-                                    <small>هوش مصنوعی پایگاه‌های معتبر پزشکی را جستجو و ساختار استاندارد را تدوین می‌کند.</small>
+                                    <input type="text" id="pharmacy_topic" name="topic" placeholder="مثال: کلاژن پلاس ال لیزین یوروویتال" class="regular-text">
+                                    <small>هوش مصنوعی پایگاه‌های معتبر پزشکی را بررسی و ساختار استاندارد را تدوین می‌کند.</small>
                                 </div>
                             </div>
 
@@ -81,7 +90,7 @@ class Pharmacy_EEAT_Admin_Page {
                             <!-- Tab 3: Text -->
                             <div class="pharmacy-tab-content" id="tab-text">
                                 <div class="pharmacy-field">
-                                    <label for="pharmacy_source_text">متن منبع انگلیسی یا نکات خام:</label>
+                                    <label for="pharmacy_source_text">متن منبع انگلیسی یا نکات بروشور دارو:</label>
                                     <textarea id="pharmacy_source_text" name="source_text" rows="5" class="large-text" placeholder="متن مقالات یا مشخصات بروشور را اینجا قرار دهید..."></textarea>
                                 </div>
                             </div>
@@ -102,7 +111,7 @@ class Pharmacy_EEAT_Admin_Page {
                                 <div class="pharmacy-col">
                                     <div class="pharmacy-field">
                                         <label for="pharmacy_keyword">کلمه کلیدی رنک‌مث (Focus Keyword):</label>
-                                        <input type="text" id="pharmacy_keyword" name="focus_keyword" placeholder="مثال: کپسول گاباپنتین" class="regular-text">
+                                        <input type="text" id="pharmacy_keyword" name="focus_keyword" placeholder="مثال: کلاژن پلاس ال لیزین یوروویتال" class="regular-text">
                                     </div>
                                 </div>
                             </div>
@@ -112,9 +121,9 @@ class Pharmacy_EEAT_Admin_Page {
                                     <div class="pharmacy-field">
                                         <label for="pharmacy_words">حجم محتوا:</label>
                                         <select id="pharmacy_words" name="word_count">
-                                            <option value="800">مختصر و متمرکز (حدود ۸۰۰ کلمه - مناسب دسته‌بندی و محصولات)</option>
+                                            <option value="800">مختصر و متمرکز (حدود ۸۰۰ کلمه - مناسب محصولات و دسته‌بندی)</option>
                                             <option value="1500" selected>استاندارد و جامع (حدود ۱۵۰۰ کلمه)</option>
-                                            <option value="2500">راهنمای مرجع و آسمان‌خراش (بیش از ۲۵۰۰ کلمه)</option>
+                                            <option value="2500">راهنمای مرجع و کامل (بیش از ۲۵۰۰ کلمه)</option>
                                         </select>
                                     </div>
                                 </div>
@@ -144,11 +153,12 @@ class Pharmacy_EEAT_Admin_Page {
                             <h2>پیش‌نمایش محتوا و داده‌های رنک‌مث</h2>
                             <div class="pharmacy-result-actions">
                                 <button type="button" class="button button-primary" id="pharmacy-save-draft-btn">
-                                    <span class="dashicons dashicons-saved"></span> ذخیره مستقیم در پیش‌نویس‌های وردپرس
+                                    <span class="dashicons dashicons-saved"></span> ذخیره / به‌روزرسانی مستقیم در سایت
                                 </button>
                             </div>
                         </div>
 
+                        <!-- Rank Math Fields -->
                         <div class="pharmacy-rankmath-box">
                             <div class="rankmath-box-title">
                                 <span class="dashicons dashicons-chart-area"></span> فیلدهای یکپارچه با رنک‌مث (Rank Math SEO)
@@ -168,8 +178,16 @@ class Pharmacy_EEAT_Admin_Page {
                         </div>
 
                         <div class="pharmacy-field">
-                            <label>عنوان اصلی در وردپرس:</label>
+                            <label>عنوان اصلی:</label>
                             <input type="text" id="res_post_title" class="large-text" style="font-size: 1.1em; font-weight: bold;">
+                        </div>
+
+                        <!-- Product Features / Short Description Box (Important!) -->
+                        <div class="pharmacy-field" id="res_features_box">
+                            <label style="color: #0369a1; font-weight: bold;">
+                                <span class="dashicons dashicons-editor-ul" style="vertical-align: middle;"></span> معرفی ویژگی‌های محصول (توضیحات کوتاه / Short Description ووکامرس):
+                            </label>
+                            <textarea id="res_short_description" rows="4" class="large-text" placeholder="فهرست ویژگی‌های شاخص، ترکیبات و فواید محصول..."></textarea>
                         </div>
 
                         <div class="pharmacy-field">
@@ -177,8 +195,11 @@ class Pharmacy_EEAT_Admin_Page {
                             <textarea id="res_post_excerpt" rows="2" class="large-text"></textarea>
                         </div>
 
+                        <!-- Main Content / Full Product Description Box -->
                         <div class="pharmacy-field">
-                            <label>محتوای کامل به فرمت HTML:</label>
+                            <label style="color: #166534; font-weight: bold;">
+                                <span class="dashicons dashicons-editor-alignright" style="vertical-align: middle;"></span> توضیحات کامل محصول / مقاله (HTML):
+                            </label>
                             <div id="res_content_preview" class="pharmacy-article-body"></div>
                             <textarea id="res_post_content" style="display: none;"></textarea>
                         </div>
@@ -282,7 +303,7 @@ class Pharmacy_EEAT_Admin_Page {
                             <th scope="row"><label for="pharmacy_ai_model">مدل هوش مصنوعی:</label></th>
                             <td>
                                 <input type="text" name="pharmacy_ai_model" id="pharmacy_ai_model" value="<?php echo esc_attr($model); ?>" class="regular-text" dir="ltr">
-                                <p class="description">برای جمینای: <code>gemini-1.5-flash</code> یا <code>gemini-1.5-pro</code> | برای اوپن‌ای‌آی: <code>gpt-4o-mini</code> یا <code>gpt-4o</code></p>
+                                <p class="description">برای جمینای: <code>gemini-1.5-flash</code> یا <code>gemini-2.0-flash</code> یا <code>gemini-1.5-pro</code></p>
                             </td>
                         </tr>
                     </table>
@@ -322,7 +343,7 @@ class Pharmacy_EEAT_Admin_Page {
                             <th scope="row"><label for="pharmacy_ai_github_repo">نام کاربری و مخزن گیت‌هاب (Repository):</label></th>
                             <td>
                                 <input type="text" name="pharmacy_ai_github_repo" id="pharmacy_ai_github_repo" value="<?php echo esc_attr($github_repo); ?>" class="regular-text" dir="ltr" placeholder="username/repository-name">
-                                <p class="description">مثال: <code>your-username/pharmacy-eeat-ai-writer</code></p>
+                                <p class="description">مثال: <code>melikadavoodi/pharmacy-eeat-ai-writer</code></p>
                             </td>
                         </tr>
                         <tr>
