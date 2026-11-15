@@ -1,4 +1,4 @@
-/* Pharmacy EEAT AI Writer Pro JS */
+/* Pharmacy EEAT AI Writer Pro JS - Version 3.0.0 */
 jQuery(document).ready(function ($) {
 
     // Content Type Selector Pills
@@ -11,18 +11,21 @@ jQuery(document).ready(function ($) {
         if (val === 'product') {
             $('#pharmacy_words').val('800');
             $('#pharmacy_tone').val('commercial_buyer');
+            $('#pharmacy_seo_strategy').val('cro_conversion');
             $('#pharmacy_topic').attr('placeholder', 'مثال: کپسول کلاژن پلاس ال لیزین یوروویتال (۶۰ عددی)');
             $('#existing_product_row').slideDown(250);
             $('#res_features_box').show();
         } else if (val === 'category') {
             $('#pharmacy_words').val('800');
             $('#pharmacy_tone').val('commercial_buyer');
+            $('#pharmacy_seo_strategy').val('geo_ai_search');
             $('#pharmacy_topic').attr('placeholder', 'مثال: مکمل‌های تقویت پوست، مو و ناخن');
             $('#existing_product_row').slideUp(250);
             $('#res_features_box').hide();
         } else {
             $('#pharmacy_words').val('1500');
             $('#pharmacy_tone').val('medical_consultant');
+            $('#pharmacy_seo_strategy').val('geo_ai_search');
             $('#pharmacy_topic').attr('placeholder', 'مثال: کپسول گاباپنتین؛ موارد مصرف، دوز و عوارض جانبی');
             $('#existing_product_row').slideUp(250);
             $('#res_features_box').hide();
@@ -71,6 +74,9 @@ jQuery(document).ready(function ($) {
         }
     }
 
+    // Global stored generation state
+    var currentGenerationData = {};
+
     // Generate Article / Product AJAX
     $('#pharmacy-ai-generate-form').on('submit', function (e) {
         e.preventDefault();
@@ -103,6 +109,8 @@ jQuery(document).ready(function ($) {
 
                 if (res.success && res.data) {
                     var d = res.data;
+                    currentGenerationData = d;
+
                     $('#res_post_title').val(d.title || '');
                     $('#res_rank_math_title').val(d.rank_math_title || d.title || '');
                     $('#res_rank_math_desc').val(d.rank_math_description || d.excerpt || '');
@@ -111,6 +119,52 @@ jQuery(document).ready(function ($) {
                     $('#res_post_excerpt').val(d.excerpt || '');
                     $('#res_post_content').val(d.content || '');
                     $('#res_content_preview').html(d.content || '');
+
+                    // Render Scorecard
+                    if (d.scorecard) {
+                        var sc = d.scorecard;
+                        var badgeHtml = '<span class="score-badge" style="background:#0284c7;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">E-E-A-T: ' + (sc.eeat_score || '90') + '%</span>';
+                        badgeHtml += '<span class="score-badge" style="background:#16a34a;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">GEO: ' + (sc.geo_readiness || 'آماده هوش مصنوعی') + '</span>';
+                        badgeHtml += '<span class="score-badge" style="background:#8b5cf6;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">خوانایی: ' + (sc.readability || 'عالی') + '</span>';
+                        $('#res_score_badges').html(badgeHtml);
+
+                        var strengthsHtml = '';
+                        if (sc.key_strengths && Array.isArray(sc.key_strengths)) {
+                            sc.key_strengths.forEach(function (s) {
+                                strengthsHtml += '<li>' + s + '</li>';
+                            });
+                        }
+                        $('#res_score_strengths').html(strengthsHtml);
+                        $('#res_scorecard_container').show();
+                    } else {
+                        $('#res_scorecard_container').hide();
+                    }
+
+                    // Render Internal Linking Suggestions
+                    var $linksList = $('#res_internal_links_list');
+                    $linksList.empty();
+                    if (d.internal_links && Array.isArray(d.internal_links) && d.internal_links.length > 0) {
+                        d.internal_links.forEach(function (link) {
+                            var itemHtml = '<div style="background:#fff;border:1px solid #f0abfc;border-radius:6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">' +
+                                '<div><strong>انکر تکست:</strong> <span class="badge-anchor" style="background:#fae8ff;color:#86198f;padding:2px 8px;border-radius:4px;font-weight:bold;">' + link.anchor + '</span> &larr; <em>' + (link.target_topic || '') + '</em>' +
+                                '<div style="font-size:11.5px;color:#6b7280;margin-top:2px;">' + (link.reason || '') + '</div></div>' +
+                                '<button type="button" class="button button-small btn-copy-anchor" data-anchor="' + escapeHtml(link.anchor) + '">کپی انکر</button>' +
+                                '</div>';
+                            $linksList.append(itemHtml);
+                        });
+                        $('.pharmacy-internal-links-box').show();
+                    } else {
+                        $('.pharmacy-internal-links-box').hide();
+                    }
+
+                    // Render Schema JSON-LD
+                    if (d.schema_json) {
+                        var schemaString = typeof d.schema_json === 'object' ? JSON.stringify(d.schema_json, null, 2) : d.schema_json;
+                        $('#res_schema_json').val(schemaString);
+                        $('.pharmacy-schema-box').show();
+                    } else {
+                        $('.pharmacy-schema-box').hide();
+                    }
 
                     // Render references
                     var $refList = $('#res_references_list');
@@ -139,6 +193,33 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // Copy Schema Button
+    $('#btn-copy-schema').on('click', function () {
+        var schemaText = $('#res_schema_json').val();
+        if (!schemaText) return;
+
+        navigator.clipboard.writeText(schemaText).then(function () {
+            var $btn = $('#btn-copy-schema');
+            var oldText = $btn.html();
+            $btn.text('کپی شد! ✓').css('color', '#166534');
+            setTimeout(function () {
+                $btn.html(oldText).css('color', '');
+            }, 2000);
+        });
+    });
+
+    // Copy Anchor Text
+    $(document).on('click', '.btn-copy-anchor', function () {
+        var anchor = $(this).data('anchor');
+        var $btn = $(this);
+        navigator.clipboard.writeText(anchor).then(function () {
+            $btn.text('کپی شد!').css('color', '#166534');
+            setTimeout(function () {
+                $btn.text('کپی انکر').css('color', '');
+            }, 1500);
+        });
+    });
+
     // Save Directly to Draft or Update Existing Product AJAX
     $('#pharmacy-save-draft-btn').on('click', function () {
         var $btn = $(this);
@@ -151,6 +232,9 @@ jQuery(document).ready(function ($) {
         var rmKeyword = $('#res_rank_math_keyword').val();
         var contentType = $('#pharmacy_content_type').val();
         var targetProduct = $('#pharmacy_target_product').val();
+        var schemaJson = $('#res_schema_json').val();
+        var internalLinks = currentGenerationData.internal_links ? JSON.stringify(currentGenerationData.internal_links) : '';
+        var scorecard = currentGenerationData.scorecard ? JSON.stringify(currentGenerationData.scorecard) : '';
 
         if (!postTitle || !postContent) {
             alert('عنوان یا متن محتوا خالی است!');
@@ -173,16 +257,19 @@ jQuery(document).ready(function ($) {
                 excerpt: postExcerpt,
                 rank_math_title: rmTitle,
                 rank_math_desc: rmDesc,
-                rank_math_keyword: rmKeyword
+                rank_math_keyword: rmKeyword,
+                schema_json: schemaJson,
+                internal_links: internalLinks,
+                scorecard: scorecard
             },
             success: function (res) {
                 if (res.success && res.data.edit_url) {
-                    var successMsg = res.data.is_update ? 'محصول موجود با موفقیت به‌روزرسانی شد!' : 'محتوا با موفقیت ذخیره شد!';
+                    var successMsg = res.data.is_update ? 'محصول موجود با موفقیت به‌روزرسانی شد!' : 'محتوا، اسکیما و تنظیمات سئو با موفقیت ذخیره شدند!';
                     $btn.text('با موفقیت انجام شد!').css('background', '#166534');
                     var notice = '<div class="notice notice-success inline" style="margin-top: 15px; padding: 12px; border-radius: 8px;">' +
                         '<p><strong>' + successMsg + '</strong></p>' +
-                        '<p><a href="' + res.data.edit_url + '" class="button button-primary" target="_blank">رفتن مستقیم به ویرایش محصول در ووکامرس</a> ' +
-                        '<a href="' + res.data.preview_url + '" class="button button-secondary" target="_blank">مشاهده محصول در سایت</a></p>' +
+                        '<p><a href="' + res.data.edit_url + '" class="button button-primary" target="_blank">رفتن مستقیم به ویرایش نوشته / محصول</a> ' +
+                        '<a href="' + res.data.preview_url + '" class="button button-secondary" target="_blank">مشاهده در سایت</a></p>' +
                         '</div>';
                     $('#pharmacy-result-container').prepend(notice);
                 } else {
@@ -202,7 +289,7 @@ jQuery(document).ready(function ($) {
         var $btn = $(btnSelector);
         var originalText = $btn.text();
         var $status = $('#pharmacy-quick-status');
-        $btn.prop('disabled', true).text('در حال تولید با هوش مصنوعی...');
+        $btn.prop('disabled', true).text('در حال تولید با متد CRO و E-E-A-T...');
         $status.show().text('لطفاً چند ثانیه صبر کنید...').css('color', '#0284c7');
 
         $.ajax({
@@ -242,7 +329,7 @@ jQuery(document).ready(function ($) {
                         $('#rank_math_description').val(d.rank_math_desc);
                     }
 
-                    alert('اطلاعات با موفقیت تولید و در باکس‌های محصول درج شد. برای نهایی شدن روی دکمه به‌روزرسانی کلیک کنید.');
+                    alert('اطلاعات با موفقیت تولید و در باکس‌های محصول و رنک‌مث درج شد. برای نهایی شدن روی دکمه به‌روزرسانی کلیک کنید.');
                 } else {
                     $status.text('خطا: ' + (res.data || 'ناشناخته')).css('color', '#dc2626');
                 }
@@ -276,7 +363,7 @@ jQuery(document).ready(function ($) {
 
         chatHistory.push({ role: 'user', content: text });
 
-        var $loadingMsg = $('<div class="chat-msg bot-msg loading"><p>در حال جستجو و بررسی مراجع...</p></div>');
+        var $loadingMsg = $('<div class="chat-msg bot-msg loading"><p>در حال تحلیل شواهد پزشکی و مراجع...</p></div>');
         $('#pharmacy-chat-box').append($loadingMsg);
         scrollChatToBottom();
 
