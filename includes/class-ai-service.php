@@ -6,9 +6,10 @@ if (!defined('ABSPATH')) {
 class Pharmacy_EEAT_AI_Service {
 
     public static function generate_content($params) {
-        $api_provider = get_option('pharmacy_ai_provider', 'gemini');
+        $api_provider = get_option('pharmacy_ai_provider', 'openrouter');
         $api_key      = get_option('pharmacy_ai_api_key', '');
-        $model        = get_option('pharmacy_ai_model', 'gemini-1.5-flash');
+        $model        = get_option('pharmacy_ai_model', 'google/gemini-flash-1.5');
+        $proxy_base   = get_option('pharmacy_ai_api_proxy', '');
 
         if (empty($api_key)) {
             return new WP_Error('missing_key', 'کلید API در تنظیمات افزونه ثبت نشده است. لطفاً ابتدا به منوی "تنظیمات و E-E-A-T" بروید.');
@@ -49,17 +50,20 @@ class Pharmacy_EEAT_AI_Service {
         $system_instruction = self::build_system_prompt($content_type, $tone, $reviewer_name, $reviewer_code, $disclaimer_txt);
         $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $fetched_sources_text, $clean_urls);
 
-        if ($api_provider === 'gemini') {
-            return self::call_gemini($api_key, $model, $system_instruction, $user_prompt);
+        if ($api_provider === 'openrouter') {
+            return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt);
+        } elseif ($api_provider === 'gemini') {
+            return self::call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base);
         } else {
-            return self::call_openai($api_key, $model, $system_instruction, $user_prompt);
+            return self::call_openai($api_key, $model, $system_instruction, $user_prompt, $proxy_base);
         }
     }
 
     public static function chat_message($messages) {
-        $api_provider = get_option('pharmacy_ai_provider', 'gemini');
+        $api_provider = get_option('pharmacy_ai_provider', 'openrouter');
         $api_key      = get_option('pharmacy_ai_api_key', '');
-        $model        = get_option('pharmacy_ai_model', 'gemini-1.5-flash');
+        $model        = get_option('pharmacy_ai_model', 'google/gemini-flash-1.5');
+        $proxy_base   = get_option('pharmacy_ai_api_proxy', '');
 
         if (empty($api_key)) {
             return new WP_Error('missing_key', 'کلید API تنظیم نشده است.');
@@ -72,10 +76,12 @@ class Pharmacy_EEAT_AI_Service {
 ۳. طوفان فکری، تحلیل تداخلات دارویی، دوزهای بالینی، و بازنویسی متن‌ها.
 ۴. لحن شما حرفه‌ای، مودبانه، علمی و به زبان فارسی روان است. همواره برای ادعاهای علمی نام پایگاه‌های موثق را ذکر کنید.";
 
-        if ($api_provider === 'gemini') {
-            return self::call_gemini_chat($api_key, $model, $system_prompt, $messages);
+        if ($api_provider === 'openrouter') {
+            return self::call_openrouter_chat($api_key, $model, $system_prompt, $messages);
+        } elseif ($api_provider === 'gemini') {
+            return self::call_gemini_chat($api_key, $model, $system_prompt, $messages, $proxy_base);
         } else {
-            return self::call_openai_chat($api_key, $model, $system_prompt, $messages);
+            return self::call_openai_chat($api_key, $model, $system_prompt, $messages, $proxy_base);
         }
     }
 
@@ -178,8 +184,93 @@ class Pharmacy_EEAT_AI_Service {
         return $prompt;
     }
 
-    private static function call_gemini($api_key, $model, $system_instruction, $user_prompt) {
-        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$api_key}";
+    private static function call_openrouter($api_key, $model, $system_instruction, $user_prompt) {
+        $endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+
+        $body_data = array(
+            'model'    => $model,
+            'messages' => array(
+                array('role' => 'system', 'content' => $system_instruction),
+                array('role' => 'user', 'content' => $user_prompt),
+            ),
+            'response_format' => array('type' => 'json_object'),
+            'temperature'     => 0.4,
+        );
+
+        $response = wp_remote_post($endpoint, array(
+            'headers' => array(
+                'Content-Type'  => 'application/json',
+                'Authorization' => 'Bearer ' . $api_key,
+                'HTTP-Referer'  => 'https://drdarabipharmacy.com',
+                'X-Title'       => 'Dr Darabi Pharmacy AI Writer',
+            ),
+            'body'    => wp_json_encode($body_data),
+            'timeout' => 120,
+        ));
+
+        if (is_wp_error($response)) {
+            return new WP_Error('api_error', 'خطا در ارتباط با اوپن‌روتر: ' . $response->get_error_message());
+        }
+
+        $code = wp_remote_retrieve_response_code($response);
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if ($code !== 200) {
+            $err_msg = isset($data['error']['message']) ? $data['error']['message'] : "کد وضعیت HTTP: {$code}";
+            return new WP_Error('openrouter_error', 'خطای اوپن‌روتر: ' . $err_msg);
+        }
+
+        $raw_text = $data['choices'][0]['message']['content'] ?? '';
+        return self::parse_json_result($raw_text);
+    }
+
+    private static function call_openrouter_chat($api_key, $model, $system_prompt, $messages) {
+        $endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+
+        $formatted = array(array('role' => 'system', 'content' => $system_prompt));
+        foreach ($messages as $msg) {
+            $formatted[] = array(
+                'role'    => ($msg['role'] === 'user') ? 'user' : 'assistant',
+                'content' => sanitize_text_field($msg['content'])
+            );
+        }
+
+        $body_data = array(
+            'model'       => $model,
+            'messages'    => $formatted,
+            'temperature' => 0.6,
+        );
+
+        $response = wp_remote_post($endpoint, array(
+            'headers' => array(
+                'Content-Type'  => 'application/json',
+                'Authorization' => 'Bearer ' . $api_key,
+                'HTTP-Referer'  => 'https://drdarabipharmacy.com',
+                'X-Title'       => 'Dr Darabi Pharmacy AI Chat',
+            ),
+            'body'    => wp_json_encode($body_data),
+            'timeout' => 60,
+        ));
+
+        if (is_wp_error($response)) {
+            return new WP_Error('api_error', $response->get_error_message());
+        }
+
+        $body = wp_remote_retrieve_body($response);
+        $data = json_decode($body, true);
+
+        if (isset($data['error'])) {
+            return new WP_Error('openrouter_error', $data['error']['message'] ?? 'خطای ناشناخته');
+        }
+
+        $reply = $data['choices'][0]['message']['content'] ?? '';
+        return array('reply' => $reply);
+    }
+
+    private static function call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '') {
+        $base = !empty($proxy_base) ? rtrim($proxy_base, '/') : 'https://generativelanguage.googleapis.com';
+        $endpoint = "{$base}/v1beta/models/{$model}:generateContent?key={$api_key}";
 
         $safety_settings = array(
             array('category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_NONE'),
@@ -223,29 +314,22 @@ class Pharmacy_EEAT_AI_Service {
         $body = wp_remote_retrieve_body($response);
         $data = json_decode($body, true);
 
+        if ($code === 403) {
+            return new WP_Error('gemini_403', 'خطای کد ۴۰۳: سرورهای گوگل جمینای آی‌پی ایران را مسدود کرده‌اند. لطفاً از گزینه "اوپن‌روتر" در تنظیمات استفاده کنید یا آدرس ورکر کلادفلر را در فیلد پروکسی قرار دهید.');
+        }
+
         if ($code !== 200) {
             $err_msg = isset($data['error']['message']) ? $data['error']['message'] : "کد وضعیت HTTP: {$code}";
             return new WP_Error('gemini_error', 'خطای ای‌پی‌آی جمینای: ' . $err_msg);
         }
 
-        if (isset($data['candidates'][0]['finishReason']) && $data['candidates'][0]['finishReason'] === 'SAFETY') {
-            return new WP_Error('gemini_safety', 'پاسخ توسط فیلتر ایمنی جمینای مسدود شد. لطفاً موضوع را کمی تعدیل کنید.');
-        }
-
         $raw_text = $data['candidates'][0]['content']['parts'][0]['text'] ?? '';
-        if (empty($raw_text)) {
-            // Check promptFeedback
-            if (isset($data['promptFeedback']['blockReason'])) {
-                return new WP_Error('gemini_blocked', 'درخواست به دلیل ' . $data['promptFeedback']['blockReason'] . ' مسدود شد.');
-            }
-            return new WP_Error('empty_result', 'پاسخ خالی از جمینای دریافت شد. لطفاً مدل دیگری را از تنظیمات انتخاب کنید.');
-        }
-
         return self::parse_json_result($raw_text);
     }
 
-    private static function call_gemini_chat($api_key, $model, $system_prompt, $messages) {
-        $endpoint = "https://generativelanguage.googleapis.com/v1beta/models/{$model}:generateContent?key={$api_key}";
+    private static function call_gemini_chat($api_key, $model, $system_prompt, $messages, $proxy_base = '') {
+        $base = !empty($proxy_base) ? rtrim($proxy_base, '/') : 'https://generativelanguage.googleapis.com';
+        $endpoint = "{$base}/v1beta/models/{$model}:generateContent?key={$api_key}";
 
         $safety_settings = array(
             array('category' => 'HARM_CATEGORY_HARASSMENT', 'threshold' => 'BLOCK_NONE'),
@@ -295,8 +379,9 @@ class Pharmacy_EEAT_AI_Service {
         return array('reply' => $reply);
     }
 
-    private static function call_openai($api_key, $model, $system_instruction, $user_prompt) {
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
+    private static function call_openai($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '') {
+        $base = !empty($proxy_base) ? rtrim($proxy_base, '/') : 'https://api.openai.com/v1';
+        $endpoint = "{$base}/chat/completions";
 
         $body_data = array(
             'model'    => $model,
@@ -327,52 +412,11 @@ class Pharmacy_EEAT_AI_Service {
 
         if ($code !== 200) {
             $err_msg = isset($data['error']['message']) ? $data['error']['message'] : "کد وضعیت HTTP: {$code}";
-            return new WP_Error('openai_error', 'خطای ای‌پی‌آی اوپن‌ای‌آی: ' . $err_msg);
+            return new WP_Error('openai_error', 'خطای ای‌پی‌آی: ' . $err_msg);
         }
 
         $raw_text = $data['choices'][0]['message']['content'] ?? '';
         return self::parse_json_result($raw_text);
-    }
-
-    private static function call_openai_chat($api_key, $model, $system_prompt, $messages) {
-        $endpoint = 'https://api.openai.com/v1/chat/completions';
-
-        $formatted = array(array('role' => 'system', 'content' => $system_prompt));
-        foreach ($messages as $msg) {
-            $formatted[] = array(
-                'role'    => ($msg['role'] === 'user') ? 'user' : 'assistant',
-                'content' => sanitize_text_field($msg['content'])
-            );
-        }
-
-        $body_data = array(
-            'model'       => $model,
-            'messages'    => $formatted,
-            'temperature' => 0.6,
-        );
-
-        $response = wp_remote_post($endpoint, array(
-            'headers' => array(
-                'Content-Type'  => 'application/json',
-                'Authorization' => 'Bearer ' . $api_key,
-            ),
-            'body'    => wp_json_encode($body_data),
-            'timeout' => 60,
-        ));
-
-        if (is_wp_error($response)) {
-            return new WP_Error('api_error', $response->get_error_message());
-        }
-
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-
-        if (isset($data['error'])) {
-            return new WP_Error('openai_error', $data['error']['message'] ?? 'خطای ناشناخته');
-        }
-
-        $reply = $data['choices'][0]['message']['content'] ?? '';
-        return array('reply' => $reply);
     }
 
     private static function parse_json_result($raw_text) {
