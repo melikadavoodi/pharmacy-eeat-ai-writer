@@ -185,6 +185,11 @@ class Pharmacy_EEAT_AI_Service {
 ۸. ارزیابی سلامت محتوا (SEO & Quality Scorecard):
    - ارائه امتیاز و توصیه‌های کوتاه در مورد E-E-A-T، آمادگی هوش مصنوعی (GEO)، و خوانایی.
 
+۹. استناد به منابع علمی معتبر و لینک‌های کلیک‌خور (Evidence-Based Citations & Direct Links):
+   - در فیلد 'references' و در انتهای محتوا، باید مراجع تراز اول پزشکی (مانند مقالات PubMed/NCBI با ذکر PMID، مونوگراف‌های Mayo Clinic، راهنماهای رسمی FDA، WebMD یا Drugs.com) با عنوان دقیق و لینک واقعی اینترنتی درج شوند.
+   - هر مرجع در آرایه 'references' باید به صورت تگ لینک HTML کلیک‌خور باشد تا پزشک و بیمار بتوانند مستقیماً روی آن کلیک کرده و منبع اصلی را بررسی کنند:
+     مثال: <code>&lt;a href=\"https://pubmed.ncbi.nlm.nih.gov/...\" target=\"_blank\" rel=\"noopener noreferrer\"&gt;PubMed: عنوان پژوهش بالینی یا مقاله&lt;/a&gt;</code>
+
 فرمت خروجی الزامی:
 شما باید منحصراً و بدون کوچک‌ترین متن یا عبارت اضافی قبل و بعد، یک شیء JSON استاندارد و معتبر بازگردانید:
 {
@@ -195,7 +200,10 @@ class Pharmacy_EEAT_AI_Service {
   \"rank_math_focus_keyword\": \"کلمه کلیدی کانونی\",
   \"excerpt\": \"خلاصه و چکیده در ۲-۳ جمله جذاب\",
   \"content\": \"متن کامل با تگ‌های معنایی HTML (h2, h3, p, table, ul, blockquote)، کادر نکات کلیدی و کادرهای E-E-A-T\",
-  \"references\": [\"مرجع معتبر ۱ با ذکر نام پایگاه\", \"مرجع ۲\"],
+  \"references\": [
+    \"<a href=\\\"https://pubmed.ncbi.nlm.nih.gov/...\\\" target=\\\"_blank\\\" rel=\\\"noopener\\\">PubMed: عنوان مقاله بالینی</a>\",
+    \"<a href=\\\"https://www.mayoclinic.org/drugs-supplements/...\\\" target=\\\"_blank\\\" rel=\\\"noopener\\\">Mayo Clinic: مونوگراف علمی و دوزبندی</a>\"
+  ],
   \"faq_items\": [
     {\"question\": \"سوال پرکاربرد ۱؟\", \"answer\": \"پاسخ علمی و صریح...\"},
     {\"question\": \"سوال ۲؟\", \"answer\": \"پاسخ صریح...\"}
