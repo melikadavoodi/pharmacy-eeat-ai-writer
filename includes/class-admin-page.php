@@ -128,42 +128,73 @@ class Pharmacy_EEAT_Admin_Page {
                                 </div>
                             </div>
 
-                            <!-- Additional Options: Tone, Keyword, Words, Audience -->
-                            <div class="pharmacy-row">
-                                <div class="pharmacy-col">
-                                    <div class="pharmacy-field">
-                                        <label for="pharmacy_tone">لحن و سبک نگارش (Tone of Voice):</label>
-                                        <select id="pharmacy_tone" name="tone">
-                                            <option value="medical_consultant" selected>مشاوره‌ای و معتمد داروخانه‌ای (توصیه دکتر داروساز به بیمار)</option>
-                                            <option value="clinical_evidence">بالینی، شواهد محور و بسیار دقیق (Evidence-Based)</option>
-                                            <option value="commercial_buyer">راهنمای خرید و ترغیب‌کننده با ارزش خرید بالا</option>
-                                            <option value="simple_public">فوق‌العاده ساده، روان و عامه‌فهم</option>
+                            <!-- Brand Voice & Identity Section (v3.3.0 Feature) -->
+                            <div class="pharmacy-row" style="background: #faf5ff; padding: 12px 14px; border-radius: 8px; border: 1px solid #f3e8ff; margin-bottom: 16px;">
+                                <div class="pharmacy-col" style="flex: 1 1 50%;">
+                                    <div class="pharmacy-field" style="margin-bottom: 0;">
+                                        <label for="pharmacy_tone" style="color: #6b21a8; font-weight: bold;">
+                                            <span class="dashicons dashicons-microphone" style="vertical-align: middle;"></span> لحن و شخصیت برند (Brand Voice):
+                                        </label>
+                                        <select id="pharmacy_tone" name="tone" style="width: 100%;">
+                                            <option value="medical_consultant" selected>مشاوره‌ای و امین داروخانه‌ای (توصیه مستقیم دکتر داروساز) 🩺</option>
+                                            <option value="clinical_evidence">بالینی، آکادمیک و شواهد‌محور (Evidence-Based) 🔬</option>
+                                            <option value="commercial_buyer">راهنمای خرید هوشمندانه و ترغیب‌کننده (CRO & AIDA) 🛒</option>
+                                            <option value="beauty_aesthetic">زیبایی، لوکس و مراقبت پوستی (پوست، مو، کلاژن و ضدپیری) ✨</option>
+                                            <option value="athletic_performance">ورزشی، پرانرژی و بدنسازی (انرژی، عضله و ریکاوری) ⚡</option>
+                                            <option value="gentle_family">ملایم، آرامش‌بخش و ایمن (مادر، بارداری، کودک و خانواده) 👶</option>
+                                            <option value="simple_public">فوق‌العاده ساده، روان و عامه‌فهم (روایت کاربردی) 📖</option>
+                                            <option value="authoritative_leader">مقتدر، قاطع و مرجع دارویی کشور 👑</option>
                                         </select>
                                     </div>
                                 </div>
-                                <div class="pharmacy-col">
-                                    <div class="pharmacy-field">
-                                        <label for="pharmacy_keyword">کلمه کلیدی رنک‌مث (Focus Keyword):</label>
-                                        <input type="text" id="pharmacy_keyword" name="focus_keyword" placeholder="مثال: کلاژن پلاس ال لیزین یوروویتال" class="regular-text">
+                                <div class="pharmacy-col" style="flex: 1 1 25%;">
+                                    <div class="pharmacy-field" style="margin-bottom: 0;">
+                                        <label for="pharmacy_brand_pov" style="color: #6b21a8; font-weight: bold;">
+                                            <span class="dashicons dashicons-admin-users" style="vertical-align: middle;"></span> زاویه دید راوی (POV):
+                                        </label>
+                                        <select id="pharmacy_brand_pov" name="brand_pov" style="width: 100%;">
+                                            <option value="first_plural" selected>اول‌شخص جمع («ما در داروخانه دکتر دارابی...»)</option>
+                                            <option value="first_singular">اول‌شخص مفرد («من به عنوان داروساز...»)</option>
+                                            <option value="third_neutral">سوم‌شخص بی‌طرف و دانای کل</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="pharmacy-col" style="flex: 1 1 25%;">
+                                    <div class="pharmacy-field" style="margin-bottom: 0;">
+                                        <label for="pharmacy_reading_level" style="color: #6b21a8; font-weight: bold;">
+                                            <span class="dashicons dashicons-welcome-learn-more" style="vertical-align: middle;"></span> سطح تخصص زبان:
+                                        </label>
+                                        <select id="pharmacy_reading_level" name="reading_level" style="width: 100%;">
+                                            <option value="general" selected>عمومی و روزمره</option>
+                                            <option value="semi_specialist">نیمه‌تخصصی (توضیح در پرانتز)</option>
+                                            <option value="clinical_specialist">تخصصی بالینی و فارماکولوژی</option>
+                                        </select>
                                     </div>
                                 </div>
                             </div>
 
+                            <!-- Additional Options: Keyword, Words, Audience -->
                             <div class="pharmacy-row">
-                                <div class="pharmacy-col">
+                                <div class="pharmacy-col" style="flex: 1 1 40%;">
+                                    <div class="pharmacy-field">
+                                        <label for="pharmacy_keyword">کلمه کلیدی رنک‌مث (Focus Keyword):</label>
+                                        <input type="text" id="pharmacy_keyword" name="focus_keyword" placeholder="مثال: کلاژن پلاس ال لیزین یوروویتال" class="regular-text" style="width: 100%;">
+                                    </div>
+                                </div>
+                                <div class="pharmacy-col" style="flex: 1 1 30%;">
                                     <div class="pharmacy-field">
                                         <label for="pharmacy_words">حجم محتوا:</label>
-                                        <select id="pharmacy_words" name="word_count">
-                                            <option value="800">مختصر و متمرکز (حدود ۸۰۰ کلمه - مناسب محصولات و دسته‌بندی)</option>
+                                        <select id="pharmacy_words" name="word_count" style="width: 100%;">
+                                            <option value="800">مختصر و متمرکز (حدود ۸۰۰ کلمه - مناسب محصولات)</option>
                                             <option value="1500" selected>استاندارد و جامع (حدود ۱۵۰۰ کلمه)</option>
                                             <option value="2500">راهنمای مرجع و کامل (بیش از ۲۵۰۰ کلمه)</option>
                                         </select>
                                     </div>
                                 </div>
-                                <div class="pharmacy-col">
+                                <div class="pharmacy-col" style="flex: 1 1 30%;">
                                     <div class="pharmacy-field">
                                         <label for="pharmacy_audience">مخاطب هدف:</label>
-                                        <select id="pharmacy_audience" name="target_audience">
+                                        <select id="pharmacy_audience" name="target_audience" style="width: 100%;">
                                             <option value="general" selected>عموم مصرف‌کنندگان و بیماران</option>
                                             <option value="specialist">پزشکان، داروسازان و کادر درمان</option>
                                         </select>
