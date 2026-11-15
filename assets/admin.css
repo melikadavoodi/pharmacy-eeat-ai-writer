@@ -454,3 +454,44 @@
     background: #00a389 !important;
     border-color: #008f77 !important;
 }
+
+
+/* Scorecard & Advanced SEO / GEO Elements (v3.0.0) */
+.pharmacy-takeaways-box {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-right: 5px solid #0284c7;
+    padding: 16px 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.pharmacy-takeaways-box h4 {
+    margin-top: 0;
+    margin-bottom: 10px;
+    color: #0369a1;
+    font-size: 16px;
+    font-weight: 700;
+}
+
+.pharmacy-takeaways-box ul {
+    margin-bottom: 0;
+    padding-right: 20px;
+}
+
+.score-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 12px;
+    font-size: 11.5px;
+    font-weight: 700;
+    letter-spacing: 0.2px;
+}
+
+.btn-copy-anchor {
+    font-size: 11.5px !important;
+    padding: 2px 8px !important;
+    height: auto !important;
+    line-height: 1.8 !important;
+}
