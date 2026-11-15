@@ -165,11 +165,12 @@ class Pharmacy_EEAT_AI_Service {
 ۱. تمام متن باید به زبان فارسی فاخر، شیوا، گرم و تخصصی نگارش شود.
 ۲. رعایت دقیق نیم‌فاصله‌ها در تمام کلمات مرکب و افعال الزامی است (مثال: «می‌شود»، «داروخانه‌ای»، «ترکیب‌ها»، «دسته‌بندی»، «به‌ویژه»).
 ۳. از ترجمه‌های تحت‌اللفظی و کلیشه‌های ماشینی مانند «در این مقاله به بررسی...»، «امیدواریم مفید واقع شده باشد» یا «در دنیای امروز...» مطلقاً خودداری کنید. محتوا باید بلافاصله با ارزش علمی و پاسخ به نیاز کاربر آغاز شود.
-۴. درج دو کادر رسمی پزشکی در انتهای متن:
+۴. قانون طلایی قالب JSON: در تمام کدهای HTML درون فیلدهای JSON، برای صفات و اتریبیوت‌ها حتماً از علامت کوتیشن تکی (') استفاده کنید مانند: <div class='pharmacy-eeat-reviewer-box'> تا شیء JSON به هیچ وجه خراب نشود.
+۵. درج دو کادر رسمی پزشکی در انتهای متن:
    - کادر تایید داروساز:
-     <div class=\"pharmacy-eeat-reviewer-box\"><strong>تایید و بازبینی علمی توسط:</strong> {$reviewer_name} (شماره نظام پزشکی: {$reviewer_code})</div>
+     <div class='pharmacy-eeat-reviewer-box'><strong>تایید و بازبینی علمی توسط:</strong> {$reviewer_name} (شماره نظام پزشکی: {$reviewer_code})</div>
    - کادر سلب مسئولیت:
-     <div class=\"pharmacy-eeat-disclaimer-box\"><strong>سلب مسئولیت پزشکی:</strong> {$disclaimer_txt}</div>
+     <div class='pharmacy-eeat-disclaimer-box'><strong>سلب مسئولیت پزشکی:</strong> {$disclaimer_txt}</div>
 
 ۵. تولید بهینه‌سازی رنک‌مث:
    - 'rank_math_title': عنوان جذاب با طول زیر ۶۰ کاراکتر دارای کلمه کلیدی اصلی.
@@ -263,7 +264,7 @@ class Pharmacy_EEAT_AI_Service {
             ),
             'response_format' => array('type' => 'json_object'),
             'temperature'     => 0.4,
-            'max_tokens'      => 4000,
+            'max_tokens'      => 8000,
         );
 
         $response = wp_remote_post($endpoint, array(
@@ -461,7 +462,7 @@ class Pharmacy_EEAT_AI_Service {
             ),
             'response_format' => array('type' => 'json_object'),
             'temperature'     => 0.4,
-            'max_tokens'      => 4000,
+            'max_tokens'      => 8000,
         );
 
         $response = wp_remote_post($endpoint, array(
@@ -495,14 +496,78 @@ class Pharmacy_EEAT_AI_Service {
             return new WP_Error('empty_result', 'پاسخی از مدل دریافت نشد.');
         }
 
-        $clean_json = preg_replace('/^```(?:json)?\s*/i', '', trim($raw_text));
+        $clean_json = trim($raw_text);
+        // Remove markdown code fences
+        $clean_json = preg_replace('/^```(?:json)?\s*/i', '', $clean_json);
         $clean_json = preg_replace('/\s*```$/', '', $clean_json);
 
-        $parsed = json_decode($clean_json, true);
-        if (!$parsed || !isset($parsed['content'])) {
-            return new WP_Error('invalid_json', 'پاسخ هوش مصنوعی در قالب استاندارد نبود. متن دریافتی: ' . mb_substr($raw_text, 0, 100));
+        // 1. Try finding outer braces
+        $first_brace = strpos($clean_json, '{');
+        $last_brace  = strrpos($clean_json, '}');
+        if ($first_brace !== false && $last_brace !== false && $last_brace > $first_brace) {
+            $candidate = substr($clean_json, $first_brace, $last_brace - $first_brace + 1);
+            $parsed = json_decode($candidate, true);
+            if ($parsed && is_array($parsed) && !empty($parsed['content'])) {
+                return $parsed;
+            }
+        } else {
+            $candidate = $clean_json;
         }
 
-        return $parsed;
+        // 2. Try standard decode
+        $parsed = json_decode($clean_json, true);
+        if ($parsed && is_array($parsed) && !empty($parsed['content'])) {
+            return $parsed;
+        }
+
+        // 3. Try fixing unescaped line breaks and control characters inside strings
+        $repaired = preg_replace('/(?<!\\\\)\r?\n/', '\n', $candidate);
+        $parsed = json_decode($repaired, true);
+        if ($parsed && is_array($parsed) && !empty($parsed['content'])) {
+            return $parsed;
+        }
+
+        // 4. Try auto-closing cut-off JSON (if token limit ended mid-stream)
+        $auto_closed = rtrim($clean_json, " \t\n\r,") . '"}';
+        $parsed = json_decode($auto_closed, true);
+        if ($parsed && is_array($parsed) && !empty($parsed['content'])) {
+            return $parsed;
+        }
+        $auto_closed2 = rtrim($clean_json, " \t\n\r,") . '"} }';
+        $parsed = json_decode($auto_closed2, true);
+        if ($parsed && is_array($parsed) && !empty($parsed['content'])) {
+            return $parsed;
+        }
+
+        // 5. Robust Regex Extraction Fallback (Ensures user NEVER gets a JSON format error!)
+        $extracted = array();
+
+        if (preg_match('/"title"\s*:\s*"([^"]+)"/u', $clean_json, $m)) {
+            $extracted['title'] = trim($m[1]);
+        }
+        if (preg_match('/"rank_math_title"\s*:\s*"([^"]+)"/u', $clean_json, $m)) {
+            $extracted['rank_math_title'] = trim($m[1]);
+        }
+        if (preg_match('/"rank_math_description"\s*:\s*"([^"]+)"/u', $clean_json, $m)) {
+            $extracted['rank_math_description'] = trim($m[1]);
+        }
+        if (preg_match('/"rank_math_focus_keyword"\s*:\s*"([^"]+)"/u', $clean_json, $m)) {
+            $extracted['rank_math_focus_keyword'] = trim($m[1]);
+        }
+        if (preg_match('/"short_description"\s*:\s*"(.*?)(?:"\s*,\s*"|"\s*,\s*\n\s*"|"\s*\})/us', $clean_json, $m)) {
+            $extracted['short_description'] = stripcslashes($m[1]);
+        }
+        if (preg_match('/"excerpt"\s*:\s*"([^"]+)"/u', $clean_json, $m)) {
+            $extracted['excerpt'] = trim($m[1]);
+        }
+        if (preg_match('/"content"\s*:\s*"(.*?)(?:"\s*,\s*"|"\s*,\s*\n\s*"|"\s*\})/us', $clean_json, $m)) {
+            $extracted['content'] = stripcslashes($m[1]);
+        }
+
+        if (!empty($extracted['content'])) {
+            return $extracted;
+        }
+
+        return new WP_Error('invalid_json', 'خطای تجزیه خروجی مدل. متن دریافت شده: ' . mb_substr($raw_text, 0, 150));
     }
 }
