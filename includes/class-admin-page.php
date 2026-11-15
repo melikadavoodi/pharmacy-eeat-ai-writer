@@ -20,6 +20,22 @@ class Pharmacy_EEAT_Admin_Page {
                 </div>
             <?php endif; ?>
 
+            <!-- Auto-Save & Recovery Banner (v3.2.0) -->
+            <div id="pharmacy-restore-banner" style="display: none; background: #f0fdf4; border: 1px solid #86efac; border-right: 5px solid #16a34a; border-radius: 8px; padding: 12px 18px; margin-bottom: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+                <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                    <div>
+                        <span class="dashicons dashicons-backup" style="color: #16a34a; vertical-align: middle; font-size: 20px;"></span>
+                        <strong>بازیابی امن:</strong> یک نسخه ذخیره شده از محتوای تولیدشده قبلی برای <span id="saved-topic-name" style="color: #166534; font-weight: bold;"></span> (ثبت‌شده در ساعت <span id="saved-time"></span>) در حافظه مرورگر شما موجود است.
+                    </div>
+                    <div style="display: flex; gap: 8px;">
+                        <button type="button" class="button button-primary" id="btn-restore-last-generated">
+                            <span class="dashicons dashicons-controls-repeat" style="vertical-align: middle;"></span> بازیابی این محتوا (بدون مصرف توکن)
+                        </button>
+                        <button type="button" class="button button-secondary" id="btn-dismiss-restore">نادیده گرفتن</button>
+                    </div>
+                </div>
+            </div>
+
             <!-- Main Layout with Two Columns: Generator + ChatBot -->
             <div class="pharmacy-two-col-layout">
                 <!-- Left Column: Content Generator -->
