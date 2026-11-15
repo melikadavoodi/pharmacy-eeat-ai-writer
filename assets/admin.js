@@ -208,6 +208,45 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // Quick Copy Buttons for Fields
+    $(document).on('click', '.btn-quick-copy', function () {
+        var targetSelector = $(this).data('target');
+        var textToCopy = $(targetSelector).val() || $(targetSelector).text() || '';
+        var $btn = $(this);
+        var originalText = $btn.text();
+
+        if (!textToCopy) {
+            alert('متنی برای کپی یافت نشد!');
+            return;
+        }
+
+        navigator.clipboard.writeText(textToCopy).then(function () {
+            $btn.text('کپی شد! ✓').css({ 'background': '#166534', 'color': '#fff', 'border-color': '#166534' });
+            setTimeout(function () {
+                $btn.text(originalText).css({ 'background': '', 'color': '', 'border-color': '' });
+            }, 1800);
+        });
+    });
+
+    // Copy Full Content HTML Button
+    $('#btn-copy-full-content').on('click', function () {
+        var fullText = $('#res_post_content').val();
+        var $btn = $(this);
+        var originalHtml = $btn.html();
+
+        if (!fullText) {
+            alert('متنی برای کپی وجود ندارد!');
+            return;
+        }
+
+        navigator.clipboard.writeText(fullText).then(function () {
+            $btn.html('<span class="dashicons dashicons-yes"></span> کل متن کپی شد!').css({ 'background': '#166534', 'color': '#fff' });
+            setTimeout(function () {
+                $btn.html(originalHtml).css({ 'background': '', 'color': '' });
+            }, 2000);
+        });
+    });
+
     // Copy Anchor Text
     $(document).on('click', '.btn-copy-anchor', function () {
         var anchor = $(this).data('anchor');
@@ -232,6 +271,7 @@ jQuery(document).ready(function ($) {
         var rmKeyword = $('#res_rank_math_keyword').val();
         var contentType = $('#pharmacy_content_type').val();
         var targetProduct = $('#pharmacy_target_product').val();
+        var saveMode = $('input[name="pharmacy_save_mode"]:checked').val() || 'replace';
         var schemaJson = $('#res_schema_json').val();
         var internalLinks = currentGenerationData.internal_links ? JSON.stringify(currentGenerationData.internal_links) : '';
         var scorecard = currentGenerationData.scorecard ? JSON.stringify(currentGenerationData.scorecard) : '';
@@ -251,6 +291,7 @@ jQuery(document).ready(function ($) {
                 nonce: pharmacyAiData.nonce,
                 content_type: contentType,
                 target_product: targetProduct,
+                save_mode: saveMode,
                 title: postTitle,
                 content: postContent,
                 short_description: shortDesc,
@@ -264,10 +305,23 @@ jQuery(document).ready(function ($) {
             },
             success: function (res) {
                 if (res.success && res.data.edit_url) {
-                    var successMsg = res.data.is_update ? 'محصول موجود با موفقیت به‌روزرسانی شد!' : 'محتوا، اسکیما و تنظیمات سئو با موفقیت ذخیره شدند!';
+                    var modeText = (saveMode === 'append') ? ' (افزوده شده به انتهای محتوای فعلی)' : '';
+                    var successMsg = res.data.is_update ? 
+                        ('محصول «' + (res.data.post_title || '') + '» (شناسه: ' + res.data.post_id + ') با موفقیت به‌روزرسانی شد!' + modeText) : 
+                        ('محتوای جدید با شناسه ' + res.data.post_id + ' با موفقیت ذخیره شد!');
+
                     $btn.text('با موفقیت انجام شد!').css('background', '#166534');
-                    var notice = '<div class="notice notice-success inline" style="margin-top: 15px; padding: 12px; border-radius: 8px;">' +
-                        '<p><strong>' + successMsg + '</strong></p>' +
+                    var notice = '<div class="notice notice-success inline" style="margin-top: 15px; padding: 14px 18px; border-radius: 8px; border-right: 5px solid #16a34a;">' +
+                        '<p style="font-size: 14px; margin-top: 0;"><strong>' + successMsg + '</strong></p>' +
+                        '<p style="margin-bottom: 0;"><a href="' + res.data.edit_url + '" class="button button-primary" target="_blank">رفتن مستقیم به ویرایش محصول در ووکامرس</a> ' +
+                        '<a href="' + res.data.preview_url + '" class="button button-secondary" target="_blank">مشاهده در سایت</a></p>' +
+                        '</div>';
+                    $('#pharmacy-result-container').prepend(notice);
+                } else {
+                    $btn.prop('disabled', false).text('ذخیره / به‌روزرسانی مستقیم');
+                    alert('خطا در ذخیره: ' + (res.data ? res.data : 'ناشناخته'));
+                }
+            },
                         '<p><a href="' + res.data.edit_url + '" class="button button-primary" target="_blank">رفتن مستقیم به ویرایش نوشته / محصول</a> ' +
                         '<a href="' + res.data.preview_url + '" class="button button-secondary" target="_blank">مشاهده در سایت</a></p>' +
                         '</div>';
