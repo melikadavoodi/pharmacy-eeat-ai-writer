@@ -77,6 +77,137 @@ jQuery(document).ready(function ($) {
     // Global stored generation state
     var currentGenerationData = {};
 
+    // Check for previous Auto-Save on page load
+    checkAutoSave();
+
+    function saveAutoSave(d, topic) {
+        try {
+            var payload = {
+                data: d,
+                topic: topic || $('#pharmacy_topic').val() || 'بدون عنوان',
+                time: new Date().toLocaleTimeString('fa-IR', { hour: '2-digit', minute: '2-digit' }),
+                date: new Date().toLocaleDateString('fa-IR')
+            };
+            localStorage.setItem('pharmacy_ai_autosave', JSON.stringify(payload));
+        } catch (e) {
+            console.log('LocalStorage save error:', e);
+        }
+    }
+
+    function checkAutoSave() {
+        try {
+            var raw = localStorage.getItem('pharmacy_ai_autosave');
+            if (raw) {
+                var payload = JSON.parse(raw);
+                if (payload && payload.data && payload.data.content) {
+                    $('#saved-topic-name').text(payload.topic);
+                    $('#saved-time').text(payload.time + ' (' + payload.date + ')');
+                    $('#pharmacy-restore-banner').slideDown(250);
+                }
+            }
+        } catch (e) {
+            console.log('LocalStorage read error:', e);
+        }
+    }
+
+    $('#btn-restore-last-generated').on('click', function () {
+        try {
+            var raw = localStorage.getItem('pharmacy_ai_autosave');
+            if (raw) {
+                var payload = JSON.parse(raw);
+                if (payload && payload.data) {
+                    renderContentResult(payload.data);
+                    if (payload.topic && !$('#pharmacy_topic').val()) {
+                        $('#pharmacy_topic').val(payload.topic);
+                    }
+                    $('#pharmacy-restore-banner').slideUp(200);
+                    alert('محتوای قبلی با موفقیت و بدون مصرف حتی یک توکن بازیابی شد!');
+                }
+            }
+        } catch (e) {
+            alert('خطا در بازیابی محتوا.');
+        }
+    });
+
+    $('#btn-dismiss-restore').on('click', function () {
+        $('#pharmacy-restore-banner').slideUp(200);
+    });
+
+    function renderContentResult(d) {
+        currentGenerationData = d;
+
+        $('#res_post_title').val(d.title || '');
+        $('#res_rank_math_title').val(d.rank_math_title || d.title || '');
+        $('#res_rank_math_desc').val(d.rank_math_description || d.excerpt || '');
+        $('#res_rank_math_keyword').val(d.rank_math_focus_keyword || $('#pharmacy_keyword').val() || '');
+        $('#res_short_description').val(d.short_description || d.excerpt || '');
+        $('#res_post_excerpt').val(d.excerpt || '');
+        $('#res_post_content').val(d.content || '');
+        $('#res_content_preview').html(d.content || '');
+
+        // Render Scorecard
+        if (d.scorecard) {
+            var sc = d.scorecard;
+            var badgeHtml = '<span class="score-badge" style="background:#0284c7;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">E-E-A-T: ' + (sc.eeat_score || '90') + '%</span>';
+            badgeHtml += '<span class="score-badge" style="background:#16a34a;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">GEO: ' + (sc.geo_readiness || 'آماده هوش مصنوعی') + '</span>';
+            badgeHtml += '<span class="score-badge" style="background:#8b5cf6;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">خوانایی: ' + (sc.readability || 'عالی') + '</span>';
+            $('#res_score_badges').html(badgeHtml);
+
+            var strengthsHtml = '';
+            if (sc.key_strengths && Array.isArray(sc.key_strengths)) {
+                sc.key_strengths.forEach(function (s) {
+                    strengthsHtml += '<li>' + s + '</li>';
+                });
+            }
+            $('#res_score_strengths').html(strengthsHtml);
+            $('#res_scorecard_container').show();
+        } else {
+            $('#res_scorecard_container').hide();
+        }
+
+        // Render Internal Linking Suggestions
+        var $linksList = $('#res_internal_links_list');
+        $linksList.empty();
+        if (d.internal_links && Array.isArray(d.internal_links) && d.internal_links.length > 0) {
+            d.internal_links.forEach(function (link) {
+                var itemHtml = '<div style="background:#fff;border:1px solid #f0abfc;border-radius:6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">' +
+                    '<div><strong>انکر تکست:</strong> <span class="badge-anchor" style="background:#fae8ff;color:#86198f;padding:2px 8px;border-radius:4px;font-weight:bold;">' + link.anchor + '</span> &larr; <em>' + (link.target_topic || '') + '</em>' +
+                    '<div style="font-size:11.5px;color:#6b7280;margin-top:2px;">' + (link.reason || '') + '</div></div>' +
+                    '<button type="button" class="button button-small btn-copy-anchor" data-anchor="' + escapeHtml(link.anchor) + '">کپی انکر</button>' +
+                    '</div>';
+                $linksList.append(itemHtml);
+            });
+            $('.pharmacy-internal-links-box').show();
+        } else {
+            $('.pharmacy-internal-links-box').hide();
+        }
+
+        // Render Schema JSON-LD
+        if (d.schema_json) {
+            var schemaString = typeof d.schema_json === 'object' ? JSON.stringify(d.schema_json, null, 2) : d.schema_json;
+            $('#res_schema_json').val(schemaString);
+            $('.pharmacy-schema-box').show();
+        } else {
+            $('.pharmacy-schema-box').hide();
+        }
+
+        // Render references
+        var $refList = $('#res_references_list');
+        $refList.empty();
+        if (d.references && Array.isArray(d.references)) {
+            d.references.forEach(function (ref) {
+                $refList.append('<li>' + ref + '</li>');
+            });
+        } else {
+            $refList.append('<li>مراجع علمی معتبر در انتهای متن مستند شده‌اند.</li>');
+        }
+
+        $('#pharmacy-result-container').slideDown(400);
+        $('html, body').animate({
+            scrollTop: $('#pharmacy-result-container').offset().top - 40
+        }, 500);
+    }
+
     // Generate Article / Product AJAX
     $('#pharmacy-ai-generate-form').on('submit', function (e) {
         e.preventDefault();
@@ -109,78 +240,8 @@ jQuery(document).ready(function ($) {
 
                 if (res.success && res.data) {
                     var d = res.data;
-                    currentGenerationData = d;
-
-                    $('#res_post_title').val(d.title || '');
-                    $('#res_rank_math_title').val(d.rank_math_title || d.title || '');
-                    $('#res_rank_math_desc').val(d.rank_math_description || d.excerpt || '');
-                    $('#res_rank_math_keyword').val(d.rank_math_focus_keyword || $('#pharmacy_keyword').val() || '');
-                    $('#res_short_description').val(d.short_description || d.excerpt || '');
-                    $('#res_post_excerpt').val(d.excerpt || '');
-                    $('#res_post_content').val(d.content || '');
-                    $('#res_content_preview').html(d.content || '');
-
-                    // Render Scorecard
-                    if (d.scorecard) {
-                        var sc = d.scorecard;
-                        var badgeHtml = '<span class="score-badge" style="background:#0284c7;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">E-E-A-T: ' + (sc.eeat_score || '90') + '%</span>';
-                        badgeHtml += '<span class="score-badge" style="background:#16a34a;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">GEO: ' + (sc.geo_readiness || 'آماده هوش مصنوعی') + '</span>';
-                        badgeHtml += '<span class="score-badge" style="background:#8b5cf6;color:#fff;padding:3px 8px;border-radius:12px;font-size:11.5px;font-weight:bold;">خوانایی: ' + (sc.readability || 'عالی') + '</span>';
-                        $('#res_score_badges').html(badgeHtml);
-
-                        var strengthsHtml = '';
-                        if (sc.key_strengths && Array.isArray(sc.key_strengths)) {
-                            sc.key_strengths.forEach(function (s) {
-                                strengthsHtml += '<li>' + s + '</li>';
-                            });
-                        }
-                        $('#res_score_strengths').html(strengthsHtml);
-                        $('#res_scorecard_container').show();
-                    } else {
-                        $('#res_scorecard_container').hide();
-                    }
-
-                    // Render Internal Linking Suggestions
-                    var $linksList = $('#res_internal_links_list');
-                    $linksList.empty();
-                    if (d.internal_links && Array.isArray(d.internal_links) && d.internal_links.length > 0) {
-                        d.internal_links.forEach(function (link) {
-                            var itemHtml = '<div style="background:#fff;border:1px solid #f0abfc;border-radius:6px;padding:8px 12px;display:flex;justify-content:space-between;align-items:center;">' +
-                                '<div><strong>انکر تکست:</strong> <span class="badge-anchor" style="background:#fae8ff;color:#86198f;padding:2px 8px;border-radius:4px;font-weight:bold;">' + link.anchor + '</span> &larr; <em>' + (link.target_topic || '') + '</em>' +
-                                '<div style="font-size:11.5px;color:#6b7280;margin-top:2px;">' + (link.reason || '') + '</div></div>' +
-                                '<button type="button" class="button button-small btn-copy-anchor" data-anchor="' + escapeHtml(link.anchor) + '">کپی انکر</button>' +
-                                '</div>';
-                            $linksList.append(itemHtml);
-                        });
-                        $('.pharmacy-internal-links-box').show();
-                    } else {
-                        $('.pharmacy-internal-links-box').hide();
-                    }
-
-                    // Render Schema JSON-LD
-                    if (d.schema_json) {
-                        var schemaString = typeof d.schema_json === 'object' ? JSON.stringify(d.schema_json, null, 2) : d.schema_json;
-                        $('#res_schema_json').val(schemaString);
-                        $('.pharmacy-schema-box').show();
-                    } else {
-                        $('.pharmacy-schema-box').hide();
-                    }
-
-                    // Render references
-                    var $refList = $('#res_references_list');
-                    $refList.empty();
-                    if (d.references && Array.isArray(d.references)) {
-                        d.references.forEach(function (ref) {
-                            $refList.append('<li>' + ref + '</li>');
-                        });
-                    } else {
-                        $refList.append('<li>مراجع علمی معتبر در انتهای متن مستند شده‌اند.</li>');
-                    }
-
-                    $('#pharmacy-result-container').slideDown(400);
-                    $('html, body').animate({
-                        scrollTop: $('#pharmacy-result-container').offset().top - 40
-                    }, 500);
+                    saveAutoSave(d, topic);
+                    renderContentResult(d);
                 } else {
                     alert('خطا در تولید محتوا: ' + (res.data ? res.data : 'پاسخ نامعتبر دریافت شد.'));
                 }
