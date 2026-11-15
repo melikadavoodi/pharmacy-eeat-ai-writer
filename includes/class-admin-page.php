@@ -166,9 +166,17 @@ class Pharmacy_EEAT_Admin_Page {
 
                     <!-- Result Panel -->
                     <div class="pharmacy-ai-card pharmacy-ai-result-card" id="pharmacy-result-container" style="display: none; margin-top: 25px;">
-                        <div class="pharmacy-result-header">
+                        <div class="pharmacy-result-header" style="flex-wrap: wrap; gap: 12px;">
                             <h2>پیش‌نمایش محتوا، رنک‌مث، اسکیما و لینک‌سازی</h2>
-                            <div class="pharmacy-result-actions">
+                            <div class="pharmacy-result-actions" style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                                <div style="background: #f1f5f9; padding: 4px 10px; border-radius: 6px; font-size: 12px; display: flex; gap: 8px; align-items: center;">
+                                    <strong>نحوه ذخیره:</strong>
+                                    <label style="margin: 0; cursor: pointer;"><input type="radio" name="pharmacy_save_mode" value="replace" checked> جایگزینی کامل</label>
+                                    <label style="margin: 0; cursor: pointer;"><input type="radio" name="pharmacy_save_mode" value="append"> افزودن به انتهای متن فعلی</label>
+                                </div>
+                                <button type="button" class="button button-secondary" id="btn-copy-full-content">
+                                    <span class="dashicons dashicons-clipboard"></span> کپی کل متن توضیحات
+                                </button>
                                 <button type="button" class="button button-primary" id="pharmacy-save-draft-btn">
                                     <span class="dashicons dashicons-saved"></span> ذخیره / به‌روزرسانی مستقیم در سایت
                                 </button>
@@ -192,29 +200,44 @@ class Pharmacy_EEAT_Admin_Page {
                                 <span class="dashicons dashicons-chart-area"></span> فیلدهای یکپارچه با رنک‌مث (Rank Math SEO)
                             </div>
                             <div class="pharmacy-field">
-                                <label>عنوان سئو (SEO Title):</label>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <label>عنوان سئو (SEO Title):</label>
+                                    <button type="button" class="button button-small btn-quick-copy" data-target="#res_rank_math_title">کپی عنوان سئو</button>
+                                </div>
                                 <input type="text" id="res_rank_math_title" class="regular-text">
                             </div>
                             <div class="pharmacy-field">
-                                <label>توضیحات متا (Meta Description):</label>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <label>توضیحات متا (Meta Description):</label>
+                                    <button type="button" class="button button-small btn-quick-copy" data-target="#res_rank_math_desc">کپی توضیحات متا</button>
+                                </div>
                                 <textarea id="res_rank_math_desc" rows="2" class="large-text"></textarea>
                             </div>
                             <div class="pharmacy-field">
-                                <label>کلمه کلیدی کانونی (Focus Keyword):</label>
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <label>کلمه کلیدی کانونی (Focus Keyword):</label>
+                                    <button type="button" class="button button-small btn-quick-copy" data-target="#res_rank_math_keyword">کپی کلمه کلیدی</button>
+                                </div>
                                 <input type="text" id="res_rank_math_keyword" class="regular-text">
                             </div>
                         </div>
 
                         <div class="pharmacy-field">
-                            <label>عنوان اصلی:</label>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label>عنوان اصلی نوشته / محصول:</label>
+                                <button type="button" class="button button-small btn-quick-copy" data-target="#res_post_title">کپی عنوان اصلی</button>
+                            </div>
                             <input type="text" id="res_post_title" class="large-text" style="font-size: 1.1em; font-weight: bold;">
                         </div>
 
                         <!-- Product Features / Short Description Box (Important!) -->
                         <div class="pharmacy-field" id="res_features_box">
-                            <label style="color: #0369a1; font-weight: bold;">
-                                <span class="dashicons dashicons-editor-ul" style="vertical-align: middle;"></span> معرفی ویژگی‌های محصول (توضیحات کوتاه / Short Description بر اساس AIDA/PAS):
-                            </label>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="color: #0369a1; font-weight: bold;">
+                                    <span class="dashicons dashicons-editor-ul" style="vertical-align: middle;"></span> معرفی ویژگی‌های محصول (توضیحات کوتاه / Short Description بر اساس AIDA/PAS):
+                                </label>
+                                <button type="button" class="button button-small btn-quick-copy" data-target="#res_short_description">کپی ویژگی‌ها (توضیحات کوتاه)</button>
+                            </div>
                             <textarea id="res_short_description" rows="4" class="large-text" placeholder="فهرست ویژگی‌های شاخص، ترکیبات و فواید محصول..."></textarea>
                         </div>
 
@@ -225,9 +248,12 @@ class Pharmacy_EEAT_Admin_Page {
 
                         <!-- Main Content / Full Product Description Box -->
                         <div class="pharmacy-field">
-                            <label style="color: #166534; font-weight: bold;">
-                                <span class="dashicons dashicons-editor-alignright" style="vertical-align: middle;"></span> توضیحات کامل محصول / مقاله (HTML شامل جداول و نکات کلیدی):
-                            </label>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <label style="color: #166534; font-weight: bold;">
+                                    <span class="dashicons dashicons-editor-alignright" style="vertical-align: middle;"></span> توضیحات کامل محصول / مقاله (HTML شامل جداول و نکات کلیدی):
+                                </label>
+                                <button type="button" class="button button-small btn-quick-copy" data-target="#res_post_content">کپی متن کامل (HTML)</button>
+                            </div>
                             <div id="res_content_preview" class="pharmacy-article-body"></div>
                             <textarea id="res_post_content" style="display: none;"></textarea>
                         </div>
