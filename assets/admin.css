@@ -1,0 +1,456 @@
+/* Pharmacy EEAT AI Writer Pro CSS */
+.pharmacy-ai-wrap {
+    font-family: inherit;
+    margin: 20px 20px 0 0;
+    max-width: 1400px;
+}
+
+.pharmacy-ai-header {
+    background: #fff;
+    padding: 24px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.04);
+    margin-bottom: 25px;
+    border-right: 5px solid #00a389;
+}
+
+.pharmacy-ai-header h1 {
+    margin: 0 0 8px 0;
+    font-size: 24px;
+    color: #1e293b;
+    font-weight: 700;
+}
+
+.pharmacy-ai-sub {
+    margin: 0;
+    color: #64748b;
+    font-size: 14px;
+}
+
+.pharmacy-two-col-layout {
+    display: flex;
+    gap: 25px;
+    align-items: flex-start;
+}
+
+.pharmacy-main-col {
+    flex: 1 1 65%;
+    min-width: 0;
+}
+
+.pharmacy-side-col {
+    flex: 0 0 35%;
+    min-width: 320px;
+    position: sticky;
+    top: 32px;
+}
+
+.pharmacy-ai-card {
+    background: #fff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+    border: 1px solid #e2e8f0;
+}
+
+/* Content Type Selector Pills */
+.pharmacy-type-selector {
+    display: flex;
+    gap: 12px;
+    margin-bottom: 22px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+.type-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 18px;
+    border: 1px solid #cbd5e1;
+    border-radius: 30px;
+    background: #f8fafc;
+    color: #475569;
+    font-weight: 600;
+    font-size: 13.5px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.type-pill input[type="radio"] {
+    display: none;
+}
+
+.type-pill:hover {
+    background: #f1f5f9;
+    border-color: #94a3b8;
+}
+
+.type-pill.active {
+    background: #00a389;
+    color: #fff;
+    border-color: #00a389;
+    box-shadow: 0 2px 6px rgba(0,163,137,0.3);
+}
+
+/* Tabs */
+.pharmacy-tabs {
+    display: flex;
+    gap: 10px;
+    border-bottom: 2px solid #e2e8f0;
+    margin-bottom: 22px;
+}
+
+.pharmacy-tab {
+    background: none;
+    border: none;
+    padding: 10px 18px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #64748b;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+}
+
+.pharmacy-tab:hover {
+    color: #00a389;
+}
+
+.pharmacy-tab.active {
+    color: #00a389;
+    border-bottom-color: #00a389;
+}
+
+.pharmacy-tab-content {
+    display: none;
+}
+
+.pharmacy-tab-content.active {
+    display: block;
+}
+
+/* Fields & Inputs */
+.pharmacy-field {
+    margin-bottom: 20px;
+}
+
+.pharmacy-field label {
+    display: block;
+    font-weight: 600;
+    color: #334155;
+    margin-bottom: 6px;
+    font-size: 14px;
+}
+
+.pharmacy-field .req {
+    color: #ef4444;
+}
+
+.pharmacy-field small {
+    display: block;
+    color: #94a3b8;
+    margin-top: 4px;
+    font-size: 12px;
+}
+
+.pharmacy-field input[type="text"],
+.pharmacy-field input[type="url"],
+.pharmacy-field select,
+.pharmacy-field textarea {
+    width: 100%;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 10px 14px;
+    font-size: 14px;
+    transition: border-color 0.2s;
+}
+
+.pharmacy-field input:focus,
+.pharmacy-field select:focus,
+.pharmacy-field textarea:focus {
+    border-color: #00a389;
+    box-shadow: 0 0 0 1px #00a389;
+    outline: none;
+}
+
+/* Multi-URL Repeater */
+.url-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 8px;
+}
+
+.url-input-row input {
+    flex: 1;
+}
+
+.btn-remove-url {
+    color: #dc2626 !important;
+    font-size: 18px !important;
+    line-height: 1 !important;
+    padding: 0 10px !important;
+}
+
+.pharmacy-row {
+    display: flex;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.pharmacy-col {
+    flex: 1;
+}
+
+.pharmacy-action-bar {
+    margin-top: 25px;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.pharmacy-action-bar .button-hero {
+    background: #00a389 !important;
+    border-color: #008f77 !important;
+    color: #fff !important;
+    font-size: 15px !important;
+    padding: 10px 24px !important;
+    border-radius: 8px !important;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+}
+
+.pharmacy-action-bar .button-hero:hover {
+    background: #008f77 !important;
+}
+
+/* Rank Math Box */
+.pharmacy-rankmath-box {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 25px;
+}
+
+.rankmath-box-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: #166534;
+    margin-bottom: 15px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* Article Preview Box */
+.pharmacy-article-body {
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    padding: 25px;
+    background: #fafafa;
+    max-height: 500px;
+    overflow-y: auto;
+    line-height: 1.8;
+}
+
+.pharmacy-article-body h2 {
+    color: #0f172a;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 8px;
+    margin-top: 25px;
+}
+
+.pharmacy-article-body h3 {
+    color: #334155;
+    margin-top: 20px;
+}
+
+/* E-E-A-T Preview Boxes */
+.pharmacy-eeat-reviewer-box {
+    background: #e0f2fe;
+    border-right: 4px solid #0284c7;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 20px 0;
+    color: #0369a1;
+}
+
+.pharmacy-eeat-disclaimer-box {
+    background: #fef2f2;
+    border-right: 4px solid #ef4444;
+    padding: 14px 18px;
+    border-radius: 8px;
+    margin: 20px 0;
+    color: #b91c1c;
+    font-size: 13px;
+}
+
+.pharmacy-references-box {
+    margin-top: 25px;
+    background: #f8fafc;
+    padding: 18px 20px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+}
+
+.pharmacy-references-box h3 {
+    margin-top: 0;
+    font-size: 15px;
+    color: #334155;
+}
+
+.pharmacy-references-box ul {
+    margin: 0;
+    padding-right: 20px;
+}
+
+.pharmacy-references-box li {
+    color: #475569;
+    font-size: 13px;
+    margin-bottom: 6px;
+}
+
+/* Result Header */
+.pharmacy-result-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #e2e8f0;
+    padding-bottom: 15px;
+    margin-bottom: 20px;
+}
+
+.pharmacy-result-header h2 {
+    margin: 0;
+    font-size: 18px;
+    color: #0f172a;
+}
+
+/* ChatBot Column */
+.pharmacy-chatbot-card {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    height: 640px;
+}
+
+.pharmacy-chatbot-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding-bottom: 15px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 15px;
+}
+
+.pharmacy-chatbot-header .dashicons {
+    font-size: 26px;
+    width: 26px;
+    height: 26px;
+    color: #00a389;
+}
+
+.pharmacy-chatbot-header h3 {
+    margin: 0;
+    font-size: 16px;
+    color: #0f172a;
+}
+
+.pharmacy-chatbot-header small {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.pharmacy-chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 5px;
+    margin-bottom: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.chat-msg {
+    padding: 12px 14px;
+    border-radius: 10px;
+    font-size: 13px;
+    line-height: 1.6;
+}
+
+.chat-msg p {
+    margin: 0;
+}
+
+.chat-msg.bot-msg {
+    background: #f1f5f9;
+    color: #1e293b;
+    border-right: 3px solid #00a389;
+    align-self: flex-start;
+    max-width: 90%;
+}
+
+.chat-msg.user-msg {
+    background: #00a389;
+    color: #fff;
+    align-self: flex-end;
+    max-width: 90%;
+}
+
+.pharmacy-chat-quick-prompts {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-bottom: 12px;
+}
+
+.quick-prompt-btn {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 15px;
+    padding: 4px 10px;
+    font-size: 11.5px;
+    color: #475569;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.quick-prompt-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+}
+
+.pharmacy-chat-input-bar {
+    display: flex;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+.pharmacy-chat-input-bar textarea {
+    flex: 1;
+    border: 1px solid #cbd5e1;
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 13px;
+    resize: none;
+}
+
+.pharmacy-chat-input-bar textarea:focus {
+    border-color: #00a389;
+    box-shadow: 0 0 0 1px #00a389;
+    outline: none;
+}
+
+.pharmacy-chat-input-bar button {
+    height: 40px;
+    width: 40px;
+    padding: 0 !important;
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: #00a389 !important;
+    border-color: #008f77 !important;
+}
