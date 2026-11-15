@@ -1,6 +1,16 @@
 /* Pharmacy EEAT AI Writer Pro JS - Version 3.0.0 */
 jQuery(document).ready(function ($) {
 
+    // Multi-Tone Brand Pill Toggle (v3.4.0)
+    $(document).on('change', '.tone-pill input[type="checkbox"]', function () {
+        $(this).closest('.tone-pill').toggleClass('active', $(this).is(':checked'));
+        var checkedCount = $('.tone-pill input[type="checkbox"]:checked').length;
+        if (checkedCount === 0) {
+            $(this).prop('checked', true).closest('.tone-pill').addClass('active');
+            alert('حداقل باید یک لحن برای محتوا انتخاب شده باشد.');
+        }
+    });
+
     // Content Type Selector Pills
     $('.type-pill input[type="radio"]').on('change', function () {
         $('.type-pill').removeClass('active');
