@@ -248,17 +248,27 @@ class Pharmacy_EEAT_Plugin {
         // If user entered a target product ID or URL, update existing post
         $existing_id = 0;
         if (!empty($target_product)) {
-            if (is_numeric($target_product)) {
-                $existing_id = intval($target_product);
+            $raw_target = trim($target_product);
+            if (is_numeric($raw_target)) {
+                $existing_id = intval($raw_target);
+            } elseif (preg_match('/[?&](?:p|post)=([0-9]+)/', $raw_target, $m)) {
+                $existing_id = intval($m[1]);
             } else {
-                $existing_id = url_to_postid($target_product);
+                $existing_id = url_to_postid($raw_target);
             }
         }
 
-        if ($existing_id > 0 && get_post($existing_id)) {
+        $save_mode = sanitize_text_field($_POST['save_mode'] ?? 'replace');
+
+        if ($existing_id > 0 && ($existing_post = get_post($existing_id))) {
+            $final_content = $content;
+            if ($save_mode === 'append' && !empty($existing_post->post_content)) {
+                $final_content = $existing_post->post_content . "\n\n" . $content;
+            }
+
             $update_data = array(
                 'ID'           => $existing_id,
-                'post_content' => $content,
+                'post_content' => $final_content,
                 'post_excerpt' => $excerpt,
             );
             if (!empty($title)) {
@@ -266,6 +276,7 @@ class Pharmacy_EEAT_Plugin {
             }
             wp_update_post($update_data);
             $post_id = $existing_id;
+            $post_title_result = $existing_post->post_title;
         } else {
             $post_type = ($content_type === 'product' && post_type_exists('product')) ? 'product' : 'post';
             $post_data = array(
@@ -277,6 +288,7 @@ class Pharmacy_EEAT_Plugin {
                 'post_author'  => get_current_user_id(),
             );
             $post_id = wp_insert_post($post_data);
+            $post_title_result = $title;
         }
 
         if (is_wp_error($post_id)) {
@@ -308,6 +320,7 @@ class Pharmacy_EEAT_Plugin {
         wp_send_json_success(array(
             'post_id'     => $post_id,
             'is_update'   => ($existing_id > 0),
+            'post_title'  => $post_title_result ?? $title,
             'edit_url'    => admin_url('post.php?post=' . $post_id . '&action=edit'),
             'preview_url' => get_permalink($post_id) ?: get_preview_post_link($post_id),
         ));
