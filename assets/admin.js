@@ -307,29 +307,55 @@ jQuery(document).ready(function ($) {
                     var d = res.data;
                     $status.text(d.message || 'انجام شد! صفحه را ذخیره/بروزرسانی کنید.').css('color', '#166534');
 
-                    // If Classic TinyMCE editor is present, insert content directly
-                    if (d.content && typeof tinyMCE !== 'undefined' && tinyMCE.get('content')) {
-                        tinyMCE.get('content').setContent(d.content);
-                    } else if (d.content && $('#content').length) {
-                        $('#content').val(d.content);
+                    // Update TinyMCE Main Content (both Visual and HTML mode)
+                    if (d.content) {
+                        if (typeof tinyMCE !== 'undefined' && tinyMCE.get('content') && !tinyMCE.get('content').isHidden()) {
+                            tinyMCE.get('content').setContent(d.content);
+                        }
+                        if ($('#content').length) {
+                            $('#content').val(d.content).trigger('change');
+                        }
                     }
 
-                    // Short Description / Excerpt box in WooCommerce
-                    if (d.short_description && typeof tinyMCE !== 'undefined' && tinyMCE.get('excerpt')) {
-                        tinyMCE.get('excerpt').setContent(d.short_description);
-                    } else if (d.short_description && $('#excerpt').length) {
-                        $('#excerpt').val(d.short_description);
+                    // Update WooCommerce Short Description / Excerpt (both Visual and HTML mode)
+                    if (d.short_description) {
+                        if (typeof tinyMCE !== 'undefined' && tinyMCE.get('excerpt') && !tinyMCE.get('excerpt').isHidden()) {
+                            tinyMCE.get('excerpt').setContent(d.short_description);
+                        }
+                        if ($('#excerpt').length) {
+                            $('#excerpt').val(d.short_description).trigger('change');
+                        }
                     }
 
-                    // Rank Math inputs if present on page
+                    // Real-Time Rank Math Redux Dispatch
+                    if (typeof wp !== 'undefined' && wp.data && wp.data.dispatch('rank-math')) {
+                        try {
+                            if (d.rank_math_title) {
+                                wp.data.dispatch('rank-math').updateTitle(d.rank_math_title);
+                            }
+                            if (d.rank_math_desc) {
+                                wp.data.dispatch('rank-math').updateDescription(d.rank_math_desc);
+                            }
+                            if (d.rank_math_keyword) {
+                                wp.data.dispatch('rank-math').updateFocusKeywords(d.rank_math_keyword);
+                            }
+                        } catch (e) {
+                            console.log('Rank Math dispatch:', e);
+                        }
+                    }
+
+                    // Fallback to legacy/hidden inputs if present
                     if (d.rank_math_title && $('#rank_math_title').length) {
-                        $('#rank_math_title').val(d.rank_math_title);
+                        $('#rank_math_title').val(d.rank_math_title).trigger('change');
                     }
                     if (d.rank_math_desc && $('#rank_math_description').length) {
-                        $('#rank_math_description').val(d.rank_math_desc);
+                        $('#rank_math_description').val(d.rank_math_desc).trigger('change');
+                    }
+                    if (d.rank_math_keyword && $('#rank_math_focus_keyword').length) {
+                        $('#rank_math_focus_keyword').val(d.rank_math_keyword).trigger('change');
                     }
 
-                    alert('اطلاعات با موفقیت تولید و در باکس‌های محصول و رنک‌مث درج شد. برای نهایی شدن روی دکمه به‌روزرسانی کلیک کنید.');
+                    alert('اطلاعات با موفقیت تولید و در باکس‌های محصول و اسنیپت رنک‌مث جایگذاری شد. اکنون روی دکمه آبی «به‌روزرسانی» کلیک کنید تا در دیتابیس ذخیره شود.');
                 } else {
                     $status.text('خطا: ' + (res.data || 'ناشناخته')).css('color', '#dc2626');
                 }
@@ -445,6 +471,19 @@ jQuery(document).ready(function ($) {
             success: function (res) {
                 if (res.success) {
                     $status.text('متای سئو با موفقیت به‌روزرسانی شد! صفحه را ذخیره/بروزرسانی کنید.').css('color', '#166534');
+                    var d = res.data;
+                    if (d && typeof wp !== 'undefined' && wp.data && wp.data.dispatch('rank-math')) {
+                        try {
+                            if (d.rank_math_title) {
+                                wp.data.dispatch('rank-math').updateTitle(d.rank_math_title);
+                            }
+                            if (d.rank_math_desc) {
+                                wp.data.dispatch('rank-math').updateDescription(d.rank_math_desc);
+                            }
+                        } catch (e) {
+                            console.log('Rank Math dispatch error:', e);
+                        }
+                    }
                 } else {
                     $status.text('خطا: ' + res.data).css('color', '#dc2626');
                 }
