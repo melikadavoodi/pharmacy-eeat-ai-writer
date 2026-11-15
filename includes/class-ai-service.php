@@ -15,14 +15,15 @@ class Pharmacy_EEAT_AI_Service {
             return new WP_Error('missing_key', 'کلید API در تنظیمات افزونه ثبت نشده است. لطفاً ابتدا به منوی "تنظیمات و E-E-A-T" بروید.');
         }
 
-        $content_type  = isset($params['content_type']) ? sanitize_text_field($params['content_type']) : 'blog_post';
-        $mode          = isset($params['mode']) ? sanitize_text_field($params['mode']) : 'topic';
-        $topic         = isset($params['topic']) ? sanitize_text_field($params['topic']) : '';
-        $source_urls   = isset($params['source_urls']) ? (array) $params['source_urls'] : array();
-        $source_text   = isset($params['source_text']) ? sanitize_textarea_field($params['source_text']) : '';
-        $focus_keyword = isset($params['focus_keyword']) ? sanitize_text_field($params['focus_keyword']) : '';
-        $word_count    = isset($params['word_count']) ? intval($params['word_count']) : 1500;
-        $tone          = isset($params['tone']) ? sanitize_text_field($params['tone']) : 'medical_consultant';
+        $content_type    = isset($params['content_type']) ? sanitize_text_field($params['content_type']) : 'blog_post';
+        $mode            = isset($params['mode']) ? sanitize_text_field($params['mode']) : 'topic';
+        $topic           = isset($params['topic']) ? sanitize_text_field($params['topic']) : '';
+        $source_urls     = isset($params['source_urls']) ? (array) $params['source_urls'] : array();
+        $source_text     = isset($params['source_text']) ? sanitize_textarea_field($params['source_text']) : '';
+        $focus_keyword   = isset($params['focus_keyword']) ? sanitize_text_field($params['focus_keyword']) : '';
+        $word_count      = isset($params['word_count']) ? intval($params['word_count']) : 1500;
+        $tone            = isset($params['tone']) ? sanitize_text_field($params['tone']) : 'medical_consultant';
+        $seo_strategy    = isset($params['seo_strategy']) ? sanitize_text_field($params['seo_strategy']) : 'geo_ai_search';
         $target_audience = isset($params['target_audience']) ? sanitize_text_field($params['target_audience']) : 'general';
 
         $reviewer_name  = get_option('pharmacy_ai_reviewer_name', 'دکتر داروساز');
@@ -47,8 +48,8 @@ class Pharmacy_EEAT_AI_Service {
             $fetched_sources_text = $source_text;
         }
 
-        $system_instruction = self::build_system_prompt($content_type, $tone, $reviewer_name, $reviewer_code, $disclaimer_txt);
-        $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $fetched_sources_text, $clean_urls);
+        $system_instruction = self::build_system_prompt($content_type, $tone, $seo_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt);
+        $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $fetched_sources_text, $clean_urls);
 
         if ($api_provider === 'openrouter') {
             return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt);
@@ -69,12 +70,12 @@ class Pharmacy_EEAT_AI_Service {
             return new WP_Error('missing_key', 'کلید API تنظیم نشده است.');
         }
 
-        $system_prompt = "شما 'رنک‌بات داروساز (PharmaBot)' هستید؛ یک دستیار هوشمند و متخصص ارشد داروسازی بالینی، فارماکولوژی و سئو پزشکی مطابق با استانداردهای گوگل E-E-A-T.
+        $system_prompt = "شما 'رنک‌بات داروساز (PharmaBot)' هستید؛ یک دستیار هوشمند و متخصص ارشد داروسازی بالینی، فارماکولوژی، کپی‌رایتینگ سلامت و سئو پزشکی مدرن مطابق با استانداردهای گوگل E-E-A-T، GEO و تکنیک‌های تبدیل فروش (CRO).
 وظیفه شما:
-۱. کمک به کارشناس محتوا و دکتر داروساز در کشف جدیدترین مراجع علمی (PubMed, Mayo Clinic, WebMD, FDA, Drugs.com, MedlinePlus).
-۲. پیشنهاد لینک‌ها و منابع معتبر بین‌المللی مرتبط با هر دارو، بیماری یا مکمل درخواستی.
-۳. طوفان فکری، تحلیل تداخلات دارویی، دوزهای بالینی، و بازنویسی متن‌ها.
-۴. لحن شما حرفه‌ای، مودبانه، علمی و به زبان فارسی روان است. همواره برای ادعاهای علمی نام پایگاه‌های موثق را ذکر کنید.";
+۱. کمک به کارشناس محتوا و دکتر داروساز در کشف جدیدترین مراجع علمی بین‌المللی (PubMed, Mayo Clinic, WebMD, FDA, Drugs.com, MedlinePlus).
+۲. تحلیل علمی تداخلات دارویی، منع مصرف، دوزهای مجاز و مقایسه برندهای مکمل‌های دارویی موجود در بازار ایران.
+۳. پیشنهاد زاویه دید جذاب، استراتژی لینک‌سازی داخلی و پاسخ به ابهامات خریداران داروها.
+۴. زبان شما فارسی روان، فاخر، با رعایت دقیق نیم‌فاصله‌ها و بدون کلمات ترجمه‌ای رباتیک است.";
 
         if ($api_provider === 'openrouter') {
             return self::call_openrouter_chat($api_key, $model, $system_prompt, $messages);
@@ -107,78 +108,137 @@ class Pharmacy_EEAT_AI_Service {
         return mb_substr(trim($clean), 0, 10000);
     }
 
-    private static function build_system_prompt($content_type, $tone, $reviewer_name, $reviewer_code, $disclaimer_txt) {
+    private static function build_system_prompt($content_type, $tone, $seo_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt) {
         $tones_desc = array(
-            'medical_consultant' => 'مشاوره‌ای، دلسوزانه و قابل‌اعتماد داروخانه‌ای (مثل پاسخ مستقیم دکتر داروساز به بیمار)',
-            'clinical_evidence'  => 'بسیار علمی، بالینی، دقیق و منطبق با شواهد رسمی (Evidence-Based Medicine)',
-            'commercial_buyer'   => 'ترغیب‌کننده، آگاهی‌بخش و راهنمای خرید هوشمندانه مکمل/دارو با تاکید بر ارزش خرید و کیفیت',
-            'simple_public'      => 'فوق‌العاده ساده، عامه‌فهم و بدون اصطلاحات پیچیده پزشکی'
+            'medical_consultant' => 'مشاوره‌ای، دلسوزانه، علمی و قابل‌اعتماد داروخانه‌ای (همانند گفت‌وگوی صمیمی و تخصصی دکتر داروساز در داروخانه)',
+            'clinical_evidence'  => 'بسیار علمی، بالینی، دقیق و متکی بر کارآزمایی‌های بالینی رسمی (Evidence-Based Medicine)',
+            'commercial_buyer'   => 'ترغیب‌کننده، آگاهی‌بخش، شفاف‌ساز مزایا و راهنمای خرید هوشمندانه با تکیه بر اصالت و ایمنی داروخانه',
+            'simple_public'      => 'فوق‌العاده ساده، عامه‌فهم، بدون ابهام و بدون اصطلاحات گیج‌کننده پزشکی'
         );
         $selected_tone_desc = $tones_desc[$tone] ?? $tones_desc['medical_consultant'];
 
-        $type_instructions = '';
-        if ($content_type === 'product') {
-            $type_instructions = "نوع محتوا: توضیحات صفحه محصول دارویی/مکمل فروشگاهی (WooCommerce Product Page).
-وظیفه ویژه شما:
-۱. تولید فیلد 'short_description': متن معرفی کوتاه و فهرست ویژگی‌های شاخص محصول (Bullet points شامل ترکیبات اصلی، فواید برجسته و ساخت کشور/برند) برای قرارگیری در باکس ویژگی‌های محصول ووکامرس.
-۲. تولید فیلد 'content': توضیحات کامل و جامع محصول شامل معرفی، جدول دقیق ترکیبات و دوز (HTML Table)، نحوه و زمان مصرف، هشدارهای منع مصرف، تداخلات دارویی و پرسش‌های متداول خریداران (FAQ).";
-        } elseif ($content_type === 'category') {
-            $type_instructions = "نوع محتوا: متن لندینگ یا توضیحات دسته‌بندی فروشگاه داروخانه (Taxonomy / Category Description).
-شامل راهنمای جامع خرید، معرفی کاربرد دسته، معیارهای انتخاب بر اساس سن/جنسیت و سوالات متداول.";
+        // SEO & Copywriting Strategy Directives
+        $strategy_instructions = '';
+        if ($seo_strategy === 'geo_ai_search') {
+            $strategy_instructions = "استراتژی ویژه سئو: بهینه‌سازی موتورهای هوش مصنوعی (GEO - Generative Engine Optimization & AI Overviews).
+- شروع مستقیم پاراگراف اول با یک تعریف صریح و جامع از موجودیت (Entity Definition) به گونه‌ای که پاسخ خلاصه گوگل و پرپلکسیتی دقیقاً از این پاراگراف استخراج شود.
+- ایجاد یک کادر جمع‌بندی نکات کلیدی (Key Takeaways) در ابتدای متن با کلاس 'pharmacy-takeaways-box'.
+- طراحی جدول مقایسه‌ای شفاف (HTML Table) و لیست‌های نشانه‌دار فشرده برای موتورهای مولد پاسخ.
+- گنجاندن حداقل ۳ سوال و پاسخ رایج (FAQ) در انتهای متن با نگارش مستقیم و صریح.";
+        } elseif ($seo_strategy === 'cro_conversion') {
+            $strategy_instructions = "استراتژی ویژه کپی‌رایتینگ: افزایش نرخ تبدیل و روانشناسی فروش سلامت (CRO & Marketing Copywriting - AIDA/PAS).
+- استفاده از فرمول مشکل > تشدید درد بیمار > راه‌حل علمی (PAS Formula).
+- تبدیل ویژگی‌های تخصصی و شیمیایی ترکیبات به منافع ملموس روزمره بیمار (Feature-to-Benefit Transformation).
+- رفع تردیدها و دغدغه‌های ذهنی خریدار دارو و مکمل (تضمین اصالت کالا، تاریخ انقضای معتبر، مشاوره داروساز، مجوز سازمان غذا و دارو / IRC).
+- دعوت به اقدام (CTA) هوشمندانه، حرفه‌ای و اطمینان‌بخش در انتهای متن.";
         } else {
-            $type_instructions = "نوع محتوا: مقاله جامع وبلاگ پزشکی و دارویی (Blog Post).
-شامل مقدمه، مکانیسم اثر، موارد مصرف، دوز و نحوه مصرف، عوارض جانبی تفکیک‌شده (شایع/نادر)، تداخلات دارویی، منع مصرف، هشدارهای بارداری و سوالات متداول.";
+            $strategy_instructions = "استراتژی ویژه پزشکی: مقاله آسمان‌خراش بالینی و مرجعیت حداکثری E-E-A-T (Deep Clinical Authority).
+- پوشش عمیق فارماکوکینتیک، مکانیسم عمل سلولی، گروه‌های پرخطر (بارداری، شیردهی، سالمندان، اطفال)، تداخلات فارماکولوژیک و فارماکودینامیک.
+- بررسی دوزهای درمانی و علائم مسمومیت دارویی.
+- استناد دقیق به رفرنس‌های تراز اول دنیا با ساختار آکادمیک و غنی.";
         }
 
-        return "شما یک متخصص ارشد داروسازی بالینی، نویسنده محتوای پزشکی، و کارشناس ارشد سئو رنک‌مث (Rank Math) و استانداردهای گوگل E-E-A-T هستید.
+        // Content Type Instructions
+        $type_instructions = '';
+        if ($content_type === 'product') {
+            $type_instructions = "نوع سند: صفحه محصول دارویی/مکمل فروشگاه ووکامرس (WooCommerce Product Page).
+بخش‌های الزامی:
+۱. فیلد 'short_description': متن خلاصه و ویژگی‌های شاخص در قالب فهرست گلوله‌ای (HTML ul/li) شامل: ترکیبات موثره، مزیت‌های اثبات‌شده، کشور سازنده و شرکت، فرم محصول (قرص/کپسول/شربت) و نحوه مصرف پیشنهادی.
+۲. فیلد 'content': توضیحات کامل و ساختاریافته محصول شامل: معرفی کاربرد، جدول دقیق مقادیر ترکیبات به همراه درصد نیاز روزانه (HTML Table)، مکانیسم اثر، روش و زمان ایده‌آل مصرف، هشدارهای منع مصرف و تداخلات، و سوالات متداول.";
+        } elseif ($content_type === 'category') {
+            $type_instructions = "نوع سند: توضیحات و لندینگ دسته‌بندی فروشگاه داروخانه (Category / Taxonomy Page).
+شامل راهنمای خرید تخصصی، مقایسه انواع مکمل‌ها بر اساس نیاز کاربر، پاسخ به سوالات تکرارشونده و معیارهای انتخاب بهترین برند.";
+        } else {
+            $type_instructions = "نوع سند: مقاله جامع و مرجع وبلاگ پزشکی و داروسازی (Educational Blog Post).
+شامل مقدمه گیرا، کاربردها و فواید درمانی، نحوه عملکرد در بدن، دوز و نحوه مصرف، عوارض جانبی تفکیک‌شده (شایع/نادر)، تداخلات با داروها و غذاها، احتیاط‌های ویژه، پرسش‌های متداول (FAQ) و نتیجه‌گیری.";
+        }
+
+        return "شما یک متخصص ارشد فارماکولوژی بالینی، نویسنده مقالات پزشکی تراز اول، و مشاور سئو پزشکی (Medical SEO & GEO Specialist) مطابق دستورالعمل‌های رسمی گوگل رنک‌مث (Rank Math) و فاکتورهای اعتماد E-E-A-T هستید.
 
 {$type_instructions}
 
+{$strategy_instructions}
+
 لحن نگارش: {$selected_tone_desc}.
 
-اصول الزامی که باید مو به مو رعایت شوند:
-۱. در صورت وجود چند منبع ورودی، داده‌های آنها را تلفیق، اعتبارسنجی و نکات تکمیلی را اضافه کنید.
-۲. استناد دقیق به منابع معتبر جهانی (مانند Mayo Clinic, WebMD, PubMed, FDA, Drugs.com, MedlinePlus).
-۳. قرار دادن دو کادر ویژه در انتهای مقالات یا محصولات:
+اصول ویرایشی و زبان فارسی (Persian Voice & Iranian Market Rules):
+۱. تمام متن باید به زبان فارسی فاخر، شیوا، گرم و تخصصی نگارش شود.
+۲. رعایت دقیق نیم‌فاصله‌ها در تمام کلمات مرکب و افعال الزامی است (مثال: «می‌شود»، «داروخانه‌ای»، «ترکیب‌ها»، «دسته‌بندی»، «به‌ویژه»).
+۳. از ترجمه‌های تحت‌اللفظی و کلیشه‌های ماشینی مانند «در این مقاله به بررسی...»، «امیدواریم مفید واقع شده باشد» یا «در دنیای امروز...» مطلقاً خودداری کنید. محتوا باید بلافاصله با ارزش علمی و پاسخ به نیاز کاربر آغاز شود.
+۴. درج دو کادر رسمی پزشکی در انتهای متن:
    - کادر تایید داروساز:
      <div class=\"pharmacy-eeat-reviewer-box\"><strong>تایید و بازبینی علمی توسط:</strong> {$reviewer_name} (شماره نظام پزشکی: {$reviewer_code})</div>
    - کادر سلب مسئولیت:
      <div class=\"pharmacy-eeat-disclaimer-box\"><strong>سلب مسئولیت پزشکی:</strong> {$disclaimer_txt}</div>
-۴. بهینه‌سازی دقیق برای رنک‌مث (Rank Math):
-   - تولید تگ عنوان سئو جذاب با طول کمتر از ۶۰ کاراکتر.
-   - تولید توضیحات متای کلیک‌خور و دارای کلمه کلیدی با طول بین ۱۳۰ تا ۱۶۰ کاراکتر.
 
-خروجی شما باید منحصراً و بدون هیچ متن یا کدهای اضافی، یک شیء JSON با ساختار زیر باشد:
+۵. تولید بهینه‌سازی رنک‌مث:
+   - 'rank_math_title': عنوان جذاب با طول زیر ۶۰ کاراکتر دارای کلمه کلیدی اصلی.
+   - 'rank_math_description': متا دیسکریپشن ترغیب‌کننده و شامل Call to Action با طول ۱۳۰ تا ۱۵۵ کاراکتر.
+   - 'rank_math_focus_keyword': کلمه کلیدی اصلی.
+
+۶. استراتژی پیشرفته پیوند داخلی (Internal Linking Silo):
+   - پیشنهاد ۳ تا ۵ انکرتکست و موضوع داخلی مرتبط با داروخانه (مانند مقالات مکمل‌های هم‌افزا، دسته‌بندی‌های مرتبط، یا داروهای مشابه) جهت ساخت ساختار تاپیک کلاستر.
+
+۷. تولید اسکیما ساختاریافته معتبر (JSON-LD Schema Markup):
+   - تولید اسکیما کامل بر اساس نوع محتوا (MedicalWebPage یا Product به همراه FAQPage).
+
+۸. ارزیابی سلامت محتوا (SEO & Quality Scorecard):
+   - ارائه امتیاز و توصیه‌های کوتاه در مورد E-E-A-T، آمادگی هوش مصنوعی (GEO)، و خوانایی.
+
+فرمت خروجی الزامی:
+شما باید منحصراً و بدون کوچک‌ترین متن یا عبارت اضافی قبل و بعد، یک شیء JSON استاندارد و معتبر بازگردانید:
 {
-  \"title\": \"عنوان صفحه یا محصول\",
-  \"short_description\": \"معرفی ویژگی‌های کلیدی، فواید برجسته و نکات شاخص برای باکس ویژگی‌های محصول ووکامرس (HTML list ul/li)\",
-  \"rank_math_title\": \"عنوان سئو رنک‌مث\",
-  \"rank_math_description\": \"توضیحات متای رنک‌مث\",
+  \"title\": \"عنوان کامل و جذاب مقاله یا محصول\",
+  \"short_description\": \"فهرست گلوله‌ای ویژگی‌های شاخص و مزایای برجسته برای باکس ویژگی‌های ووکامرس (HTML ul/li)\",
+  \"rank_math_title\": \"عنوان سئو رنک‌مث (زیر ۶۰ کاراکتر)\",
+  \"rank_math_description\": \"توضیحات متای رنک‌مث (۱۳۰ تا ۱۵۵ کاراکتر)\",
   \"rank_math_focus_keyword\": \"کلمه کلیدی کانونی\",
-  \"excerpt\": \"چکیده در چند خط کوتاه\",
-  \"content\": \"محتوای کامل به صورت HTML شامل تگ‌های مناسب، جداول و بخش‌ها\",
-  \"references\": [\"مرجع ۱ با آدرس یا مشخصات\", \"مرجع ۲\"]
+  \"excerpt\": \"خلاصه و چکیده در ۲-۳ جمله جذاب\",
+  \"content\": \"متن کامل با تگ‌های معنایی HTML (h2, h3, p, table, ul, blockquote)، کادر نکات کلیدی و کادرهای E-E-A-T\",
+  \"references\": [\"مرجع معتبر ۱ با ذکر نام پایگاه\", \"مرجع ۲\"],
+  \"faq_items\": [
+    {\"question\": \"سوال پرکاربرد ۱؟\", \"answer\": \"پاسخ علمی و صریح...\"},
+    {\"question\": \"سوال ۲؟\", \"answer\": \"پاسخ صریح...\"}
+  ],
+  \"internal_links\": [
+    {\"anchor\": \"انکر تکست پیشنهادی ۱\", \"target_topic\": \"صفحه یا محصول هدف پیشنهادی\", \"reason\": \"علت ارتباط موضوعی\"},
+    {\"anchor\": \"انکر تکست پیشنهادی ۲\", \"target_topic\": \"صفحه هدف ۲\", \"reason\": \"علت ارتباط\"},
+    {\"anchor\": \"انکر تکست پیشنهادی ۳\", \"target_topic\": \"صفحه هدف ۳\", \"reason\": \"علت ارتباط\"}
+  ],
+  \"schema_json\": {
+    \"@context\": \"https://schema.org\",
+    \"@type\": \"MedicalWebPage\",
+    \"name\": \"عنوان صفحه\",
+    \"description\": \"توضیح کوتاه\"
+  },
+  \"scorecard\": {
+    \"eeat_score\": 95,
+    \"geo_readiness\": \"بسیار بالا\",
+    \"readability\": \"عالی\",
+    \"key_strengths\": [\"تعریف صریح در پاراگراف لید\", \"شامل جدول دوزبندی و منع مصرف\", \"تاییدیه داروساز ناظر\"]
+  }
 }";
     }
 
-    private static function build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $sources_text, $clean_urls) {
-        $prompt = "لطفاً با توجه به مشخصات زیر محتوا را تدوین و در قالب JSON درخواستی بازگردانید:\n";
+    private static function build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $sources_text, $clean_urls) {
+        $prompt = "لطفاً با توجه به استراتژی‌های مدرن تعیین‌شده، محتوای تخصصی زیر را تدوین کرده و در قالب شیء JSON خواسته شده تحویل دهید:\n\n";
         $prompt .= "- نوع سند: " . $content_type . "\n";
         $prompt .= "- موضوع / نام دارو یا محصول: " . ($topic ? $topic : 'بر اساس منابع ورودی') . "\n";
         if ($focus_keyword) {
-            $prompt .= "- کلمه کلیدی کانونی سئو: " . $focus_keyword . "\n";
+            $prompt .= "- کلمه کلیدی کانونی (Focus Keyword): " . $focus_keyword . "\n";
         }
-        $prompt .= "- حجم تقریبی مورد نیاز: " . $word_count . " کلمه\n";
+        $prompt .= "- استراتژی محتوا: " . $seo_strategy . "\n";
+        $prompt .= "- حجم تقریبی متن: " . $word_count . " کلمه\n";
         $prompt .= "- مخاطب هدف: " . $target_audience . "\n";
 
         if ($mode === 'multi_url' || $mode === 'translate') {
-            $prompt .= "\n- دستور چندمنبعی (Multi-Source Synthesis): لطفاً داده‌های موجود در مراجع زیر را مقایسه، اعتبارسنجی و به زبان فارسی علمی و سئو شده بازآفرینی کنید:\n";
+            $prompt .= "\n- ترکیب چندمنبعی (Multi-Source Synthesis & Fact-Checking): لطفاً داده‌های موجود در مراجع خارجی زیر را با دانش روز داروسازی تلفیق، اعتبارسنجی و به زبان فارسی فاخر و بومی تدوین نمایید:\n";
             if (!empty($clean_urls)) {
-                $prompt .= "آدرس منابع:\n" . implode("\n", $clean_urls) . "\n";
+                $prompt .= "آدرس منابع ورودی:\n" . implode("\n", $clean_urls) . "\n";
             }
-            $prompt .= "متن استخراج‌شده از منابع:\n" . $sources_text . "\n";
+            $prompt .= "متن خام مراجع:\n" . $sources_text . "\n";
         } else {
-            $prompt .= "\n- دستور تالیف: از پایگاه‌های دانش و شواهد پزشکی بین‌المللی برای تدوین جامع این مبحث با استناد به منابع استفاده کنید.\n";
+            $prompt .= "\n- دستور تالیف و پژوهش بالینی: از معتبرترین پایگاه‌های شواهد پزشکی (PubMed, Mayo Clinic, FDA, Drugs.com) برای نگارش جامع و مستند استفاده شود.\n";
         }
 
         return $prompt;
@@ -203,7 +263,7 @@ class Pharmacy_EEAT_AI_Service {
                 'Content-Type'  => 'application/json',
                 'Authorization' => 'Bearer ' . $api_key,
                 'HTTP-Referer'  => 'https://drdarabipharmacy.com',
-                'X-Title'       => 'Dr Darabi Pharmacy AI Writer',
+                'X-Title'       => 'Dr Darabi Pharmacy AI Writer Pro',
             ),
             'body'    => wp_json_encode($body_data),
             'timeout' => 120,
