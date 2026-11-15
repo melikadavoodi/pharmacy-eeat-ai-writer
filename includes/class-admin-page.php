@@ -57,7 +57,7 @@ class Pharmacy_EEAT_Admin_Page {
                                 <label for="pharmacy_target_product" style="color: #166534;">
                                     <span class="dashicons dashicons-admin-links" style="vertical-align: middle;"></span> اتصال به محصول موجود در سایت (جهت درج خودکار در باکس توضیحات و ویژگی‌ها):
                                 </label>
-                                <input type="text" id="pharmacy_target_product" name="target_product" placeholder="شناسه محصول (مثال: 3165) یا لینک محصول را وارد کنید (اختیاری)" class="regular-text" style="background:#fff;">
+                                <input type="text" id="pharmacy_target_product" name="target_product" placeholder="شناسه محصول (مثال: 5247) یا لینک محصول را وارد کنید (اختیاری)" class="regular-text" style="background:#fff;">
                                 <small style="color: #15803d;">اگر شناسه محصول را وارد کنید، اطلاعات به طور خودکار مستقیماً در باکس توضیحات و باکس ویژگی‌های همان محصول ذخیره می‌شود.</small>
                             </div>
 
@@ -255,6 +255,7 @@ class Pharmacy_EEAT_Admin_Page {
             update_option('pharmacy_ai_provider', sanitize_text_field($_POST['pharmacy_ai_provider']));
             update_option('pharmacy_ai_api_key', sanitize_text_field($_POST['pharmacy_ai_api_key']));
             update_option('pharmacy_ai_model', sanitize_text_field($_POST['pharmacy_ai_model']));
+            update_option('pharmacy_ai_api_proxy', esc_url_raw(trim($_POST['pharmacy_ai_api_proxy'])));
             update_option('pharmacy_ai_reviewer_name', sanitize_text_field($_POST['pharmacy_ai_reviewer_name']));
             update_option('pharmacy_ai_reviewer_code', sanitize_text_field($_POST['pharmacy_ai_reviewer_code']));
             update_option('pharmacy_ai_disclaimer', sanitize_textarea_field($_POST['pharmacy_ai_disclaimer']));
@@ -263,9 +264,10 @@ class Pharmacy_EEAT_Admin_Page {
             echo '<div class="notice notice-success is-dismissible"><p>تنظیمات با موفقیت ذخیره شدند.</p></div>';
         }
 
-        $provider       = get_option('pharmacy_ai_provider', 'gemini');
+        $provider       = get_option('pharmacy_ai_provider', 'openrouter');
         $api_key        = get_option('pharmacy_ai_api_key', '');
-        $model          = get_option('pharmacy_ai_model', 'gemini-1.5-flash');
+        $model          = get_option('pharmacy_ai_model', 'google/gemini-flash-1.5');
+        $api_proxy      = get_option('pharmacy_ai_api_proxy', '');
         $reviewer_name  = get_option('pharmacy_ai_reviewer_name', 'دکتر داروساز');
         $reviewer_code  = get_option('pharmacy_ai_reviewer_code', '۱۲۳۴۵');
         $disclaimer     = get_option('pharmacy_ai_disclaimer', 'اطلاعات ارائه‌شده در این مقاله صرفاً جنبه آموزشی و اطلاع‌رسانی دارد و نباید جایگزین توصیه، تشخیص یا درمان پزشک متخصص و داروساز شود. قبل از مصرف یا تغییر دوز هرگونه دارو حتماً با پزشک یا داروساز مشورت نمایید.');
@@ -274,21 +276,22 @@ class Pharmacy_EEAT_Admin_Page {
         ?>
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header">
-                <h1>تنظیمات دستیار هوش مصنوعی، اعتبارسنجی E-E-A-T و به‌روزرسانی خودکار</h1>
+                <h1>تنظیمات دستیار هوش مصنوعی (پشتیبانی همزمان از اوپن‌روتر و ورکر کلادفلر)</h1>
             </div>
 
             <form method="post" action="">
                 <?php wp_nonce_field('pharmacy_ai_settings_action'); ?>
 
                 <div class="pharmacy-ai-card">
-                    <h2>۱. تنظیمات هوش مصنوعی (AI Provider)</h2>
+                    <h2>۱. سرویس‌دهنده هوش مصنوعی (AI Provider)</h2>
                     <table class="form-table">
                         <tr>
-                            <th scope="row"><label for="pharmacy_ai_provider">سرویس‌دهنده هوش مصنوعی:</label></th>
+                            <th scope="row"><label for="pharmacy_ai_provider">انتخاب سرویس‌دهنده:</label></th>
                             <td>
                                 <select name="pharmacy_ai_provider" id="pharmacy_ai_provider">
-                                    <option value="gemini" <?php selected($provider, 'gemini'); ?>>گوگل جمینای (Google Gemini - رایگان/فوق‌العاده ارزان و باکیفیت)</option>
-                                    <option value="openai" <?php selected($provider, 'openai'); ?>>اوپن‌ای‌آی (OpenAI - ChatGPT)</option>
+                                    <option value="openrouter" <?php selected($provider, 'openrouter'); ?>>اوپن‌روتر (OpenRouter - پیشنهادی فوری، بدون تحریم و بدون نیاز به پروکسی)</option>
+                                    <option value="gemini" <?php selected($provider, 'gemini'); ?>>گوگل جمینای با ورکر کلادفلر (Google Gemini + Cloudflare Worker)</option>
+                                    <option value="openai" <?php selected($provider, 'openai'); ?>>اوپن‌ای‌آی رسمی (OpenAI / ChatGPT)</option>
                                 </select>
                             </td>
                         </tr>
@@ -296,14 +299,21 @@ class Pharmacy_EEAT_Admin_Page {
                             <th scope="row"><label for="pharmacy_ai_api_key">کلید دسترسی (API Key):</label></th>
                             <td>
                                 <input type="password" name="pharmacy_ai_api_key" id="pharmacy_ai_api_key" value="<?php echo esc_attr($api_key); ?>" class="regular-text" dir="ltr">
-                                <p class="description">برای جمینای می‌توانید به صورت رایگان از Google AI Studio کلید دریافت کنید.</p>
+                                <p class="description">برای اوپن‌روتر کلید <code>sk-or-v1-...</code> از سایت openrouter.ai | برای جمینای کلید <code>AIzaSy...</code></p>
                             </td>
                         </tr>
                         <tr>
                             <th scope="row"><label for="pharmacy_ai_model">مدل هوش مصنوعی:</label></th>
                             <td>
                                 <input type="text" name="pharmacy_ai_model" id="pharmacy_ai_model" value="<?php echo esc_attr($model); ?>" class="regular-text" dir="ltr">
-                                <p class="description">برای جمینای: <code>gemini-1.5-flash</code> یا <code>gemini-2.0-flash</code> یا <code>gemini-1.5-pro</code></p>
+                                <p class="description">برای اوپن‌روتر: <code>google/gemini-flash-1.5</code> یا <code>google/gemini-2.0-flash-exp:free</code> | برای جمینای کلادفلر: <code>gemini-1.5-flash</code></p>
+                            </td>
+                        </tr>
+                        <tr id="row_api_proxy">
+                            <th scope="row"><label for="pharmacy_ai_api_proxy">آدرس ورکر کلادفلر (برای حالت جمینای):</label></th>
+                            <td>
+                                <input type="url" name="pharmacy_ai_api_proxy" id="pharmacy_ai_api_proxy" value="<?php echo esc_attr($api_proxy); ?>" class="large-text" dir="ltr" placeholder="https://your-gemini-proxy.workers.dev">
+                                <p class="description">اگر حالت جمینای کلادفلر را انتخاب کرده‌اید، آدرس ورکر کلادفلر خود را اینجا قرار دهید تا تحریم گوگل روی هاست نت‌افراز دور زده شود.</p>
                             </td>
                         </tr>
                     </table>
