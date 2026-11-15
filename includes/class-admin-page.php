@@ -128,45 +128,72 @@ class Pharmacy_EEAT_Admin_Page {
                                 </div>
                             </div>
 
-                            <!-- Brand Voice & Identity Section (v3.3.0 Feature) -->
-                            <div class="pharmacy-row" style="background: #faf5ff; padding: 12px 14px; border-radius: 8px; border: 1px solid #f3e8ff; margin-bottom: 16px;">
-                                <div class="pharmacy-col" style="flex: 1 1 50%;">
+                            <!-- Brand Voice & Identity Section (v3.4.0 Multi-Tone Feature) -->
+                            <div class="pharmacy-row" style="background: #faf5ff; padding: 14px 16px; border-radius: 8px; border: 1px solid #f3e8ff; margin-bottom: 16px;">
+                                <div class="pharmacy-col" style="flex: 1 1 100%; margin-bottom: 12px;">
                                     <div class="pharmacy-field" style="margin-bottom: 0;">
-                                        <label for="pharmacy_tone" style="color: #6b21a8; font-weight: bold;">
-                                            <span class="dashicons dashicons-microphone" style="vertical-align: middle;"></span> لحن و شخصیت برند (Brand Voice):
-                                        </label>
-                                        <select id="pharmacy_tone" name="tone" style="width: 100%;">
-                                            <option value="medical_consultant" selected>مشاوره‌ای و امین داروخانه‌ای (توصیه مستقیم دکتر داروساز) 🩺</option>
-                                            <option value="clinical_evidence">بالینی، آکادمیک و شواهد‌محور (Evidence-Based) 🔬</option>
-                                            <option value="commercial_buyer">راهنمای خرید هوشمندانه و ترغیب‌کننده (CRO & AIDA) 🛒</option>
-                                            <option value="beauty_aesthetic">زیبایی، لوکس و مراقبت پوستی (پوست، مو، کلاژن و ضدپیری) ✨</option>
-                                            <option value="athletic_performance">ورزشی، پرانرژی و بدنسازی (انرژی، عضله و ریکاوری) ⚡</option>
-                                            <option value="gentle_family">ملایم، آرامش‌بخش و ایمن (مادر، بارداری، کودک و خانواده) 👶</option>
-                                            <option value="simple_public">فوق‌العاده ساده، روان و عامه‌فهم (روایت کاربردی) 📖</option>
-                                            <option value="authoritative_leader">مقتدر، قاطع و مرجع دارویی کشور 👑</option>
-                                        </select>
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                                            <label style="color: #6b21a8; font-weight: bold; margin-bottom: 0;">
+                                                <span class="dashicons dashicons-microphone" style="vertical-align: middle;"></span> لحن و شخصیت برند (امکان انتخاب همزمان چند لحن ترکیبی):
+                                            </label>
+                                            <small style="color: #7e22ce;">می‌توانید ۲ یا چند لحن را همزمان تیک بزنید (مثلاً: زیبایی + مشاوره‌ای)</small>
+                                        </div>
+                                        <div class="pharmacy-tone-pill-group">
+                                            <label class="tone-pill active">
+                                                <input type="checkbox" name="tone[]" value="medical_consultant" checked>
+                                                <span>🩺 مشاوره‌ای و امین داروساز</span>
+                                            </label>
+                                            <label class="tone-pill">
+                                                <input type="checkbox" name="tone[]" value="beauty_aesthetic">
+                                                <span>✨ زیبایی، لوکس و مراقبت پوستی</span>
+                                            </label>
+                                            <label class="tone-pill">
+                                                <input type="checkbox" name="tone[]" value="commercial_buyer">
+                                                <span>🛒 راهنمای خرید و ترغیب‌کننده (CRO)</span>
+                                            </label>
+                                            <label class="tone-pill">
+                                                <input type="checkbox" name="tone[]" value="clinical_evidence">
+                                                <span>🔬 بالینی و شواهد‌محور</span>
+                                            </label>
+                                            <label class="tone-pill">
+                                                <input type="checkbox" name="tone[]" value="athletic_performance">
+                                                <span>⚡ ورزشی و بدنسازی</span>
+                                            </label>
+                                            <label class="tone-pill">
+                                                <input type="checkbox" name="tone[]" value="gentle_family">
+                                                <span>👶 مادر، کودک و خانواده</span>
+                                            </label>
+                                            <label class="tone-pill">
+                                                <input type="checkbox" name="tone[]" value="simple_public">
+                                                <span>📖 ساده، روان و داستان‌محور</span>
+                                            </label>
+                                            <label class="tone-pill">
+                                                <input type="checkbox" name="tone[]" value="authoritative_leader">
+                                                <span>👑 مقتدر و مرجع دارویی کشور</span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </div>
-                                <div class="pharmacy-col" style="flex: 1 1 25%;">
+                                <div class="pharmacy-col" style="flex: 1 1 50%;">
                                     <div class="pharmacy-field" style="margin-bottom: 0;">
                                         <label for="pharmacy_brand_pov" style="color: #6b21a8; font-weight: bold;">
                                             <span class="dashicons dashicons-admin-users" style="vertical-align: middle;"></span> زاویه دید راوی (POV):
                                         </label>
                                         <select id="pharmacy_brand_pov" name="brand_pov" style="width: 100%;">
-                                            <option value="first_plural" selected>اول‌شخص جمع («ما در داروخانه دکتر دارابی...»)</option>
-                                            <option value="first_singular">اول‌شخص مفرد («من به عنوان داروساز...»)</option>
+                                            <option value="first_plural" selected>اول‌شخص جمع («ما در تیم علمی داروخانه دکتر دارابی...»)</option>
+                                            <option value="first_singular">اول‌شخص مفرد («من به عنوان دکتر داروساز شما...»)</option>
                                             <option value="third_neutral">سوم‌شخص بی‌طرف و دانای کل</option>
                                         </select>
                                     </div>
                                 </div>
-                                <div class="pharmacy-col" style="flex: 1 1 25%;">
+                                <div class="pharmacy-col" style="flex: 1 1 50%;">
                                     <div class="pharmacy-field" style="margin-bottom: 0;">
                                         <label for="pharmacy_reading_level" style="color: #6b21a8; font-weight: bold;">
-                                            <span class="dashicons dashicons-welcome-learn-more" style="vertical-align: middle;"></span> سطح تخصص زبان:
+                                            <span class="dashicons dashicons-welcome-learn-more" style="vertical-align: middle;"></span> سطح تخصص زبان محتوا:
                                         </label>
                                         <select id="pharmacy_reading_level" name="reading_level" style="width: 100%;">
-                                            <option value="general" selected>عمومی و روزمره</option>
-                                            <option value="semi_specialist">نیمه‌تخصصی (توضیح در پرانتز)</option>
+                                            <option value="general" selected>عمومی و روزمره (بدون اصطلاحات پیچیده)</option>
+                                            <option value="semi_specialist">نیمه‌تخصصی (ذکر نام‌های علمی با توضیح در پرانتز)</option>
                                             <option value="clinical_specialist">تخصصی بالینی و فارماکولوژی</option>
                                         </select>
                                     </div>
