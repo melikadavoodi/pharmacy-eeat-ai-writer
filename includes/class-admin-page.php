@@ -10,8 +10,8 @@ class Pharmacy_EEAT_Admin_Page {
         ?>
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header">
-                <h1>استودیوی فوق‌پیشرفته هوش مصنوعی داروخانه (Content AI Pro)</h1>
-                <p class="pharmacy-ai-sub">تولید تخصصی مقالات بلاگ، صفحات محصول ووکامرس (توضیحات و ویژگی‌ها)، توضیحات دسته‌بندی و چت‌بات مراجع علمی پزشکی با هماهنگی رنک‌مث</p>
+                <h1>استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.0)</h1>
+                <p class="pharmacy-ai-sub">مجهز به متدولوژی‌های GEO (دیده‌شدن در هوش مصنوعی گوگل)، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ساختار اسکیما و لینک‌سازی تاپیک کلاستر</p>
             </div>
 
             <?php if (empty($api_key)) : ?>
@@ -54,7 +54,7 @@ class Pharmacy_EEAT_Admin_Page {
 
                             <!-- Optional Existing Product Link/ID Field -->
                             <div class="pharmacy-field" id="existing_product_row" style="display: none; background: #f0fdf4; padding: 14px 16px; border-radius: 8px; border: 1px dashed #16a34a; margin-bottom: 20px;">
-                                <label for="pharmacy_target_product" style="color: #166534;">
+                                <label for="pharmacy_target_product" style="color: #166534; font-weight: bold;">
                                     <span class="dashicons dashicons-admin-links" style="vertical-align: middle;"></span> اتصال به محصول موجود در سایت (جهت درج خودکار در باکس توضیحات و ویژگی‌ها):
                                 </label>
                                 <input type="text" id="pharmacy_target_product" name="target_product" placeholder="شناسه محصول (مثال: 5247) یا لینک محصول را وارد کنید (اختیاری)" class="regular-text" style="background:#fff;">
@@ -65,7 +65,7 @@ class Pharmacy_EEAT_Admin_Page {
                             <div class="pharmacy-tab-content active" id="tab-topic">
                                 <div class="pharmacy-field">
                                     <label for="pharmacy_topic">نام دارو، مکمل، بیماری یا کلمه کلیدی اصلی: <span class="req">*</span></label>
-                                    <input type="text" id="pharmacy_topic" name="topic" placeholder="مثال: کلاژن پلاس ال لیزین یوروویتال" class="regular-text">
+                                    <input type="text" id="pharmacy_topic" name="topic" placeholder="مثال: کپسول کلاژن پلاس ال لیزین یوروویتال" class="regular-text">
                                     <small>هوش مصنوعی پایگاه‌های معتبر پزشکی را بررسی و ساختار استاندارد را تدوین می‌کند.</small>
                                 </div>
                             </div>
@@ -95,7 +95,24 @@ class Pharmacy_EEAT_Admin_Page {
                                 </div>
                             </div>
 
-                            <!-- Additional Options: Tone, Words, Audience -->
+                            <!-- Strategy Row (Epic v3.0 Feature) -->
+                            <div class="pharmacy-row" style="background: #f8fafc; padding: 12px 14px; border-radius: 8px; border: 1px solid #e2e8f0; margin-bottom: 16px;">
+                                <div class="pharmacy-col" style="flex: 1 1 100%;">
+                                    <div class="pharmacy-field" style="margin-bottom: 0;">
+                                        <label for="pharmacy_seo_strategy" style="color: #0f172a; font-weight: bold;">
+                                            <span class="dashicons dashicons-awards" style="color: #0284c7; vertical-align: middle;"></span> استراتژی سئو و نگارش (SEO & Copywriting Strategy):
+                                        </label>
+                                        <select id="pharmacy_seo_strategy" name="seo_strategy" style="width: 100%; font-weight: 500;">
+                                            <option value="geo_ai_search" selected>بهینه‌سازی برای هوش مصنوعی گوگل و سرچ مدرن (GEO - AI Overviews & Perplexity) 🚀</option>
+                                            <option value="cro_conversion">بهینه‌سازی نرخ تبدیل و روانشناسی فروش سلامت (CRO & AIDA/PAS) 🛒</option>
+                                            <option value="deep_clinical_eeat">مقاله جامع مرجع و آسمان‌خراش بالینی (Deep Clinical E-E-A-T) 🔬</option>
+                                        </select>
+                                        <small style="color: #475569;">این تنظیم زاویه دید، پاراگراف لید، جداول مقایسه‌ای و ساختار پاسخ‌دهی را به طور خودکار تعیین می‌کند.</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Additional Options: Tone, Keyword, Words, Audience -->
                             <div class="pharmacy-row">
                                 <div class="pharmacy-col">
                                     <div class="pharmacy-field">
@@ -140,7 +157,7 @@ class Pharmacy_EEAT_Admin_Page {
 
                             <div class="pharmacy-action-bar">
                                 <button type="submit" id="pharmacy-btn-generate" class="button button-primary button-hero">
-                                    <span class="dashicons dashicons-superhero"></span> تولید محتوای هوشمند مطابق E-E-A-T
+                                    <span class="dashicons dashicons-superhero"></span> تولید محتوای هوشمند مطابق GEO و E-E-A-T
                                 </button>
                                 <span class="spinner" id="pharmacy-spinner"></span>
                             </div>
@@ -150,12 +167,23 @@ class Pharmacy_EEAT_Admin_Page {
                     <!-- Result Panel -->
                     <div class="pharmacy-ai-card pharmacy-ai-result-card" id="pharmacy-result-container" style="display: none; margin-top: 25px;">
                         <div class="pharmacy-result-header">
-                            <h2>پیش‌نمایش محتوا و داده‌های رنک‌مث</h2>
+                            <h2>پیش‌نمایش محتوا، رنک‌مث، اسکیما و لینک‌سازی</h2>
                             <div class="pharmacy-result-actions">
                                 <button type="button" class="button button-primary" id="pharmacy-save-draft-btn">
                                     <span class="dashicons dashicons-saved"></span> ذخیره / به‌روزرسانی مستقیم در سایت
                                 </button>
                             </div>
+                        </div>
+
+                        <!-- Scorecard Box (v3.0 Feature) -->
+                        <div class="pharmacy-scorecard-box" id="res_scorecard_container" style="background: #f0f9ff; border: 1px solid #bae6fd; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <h3 style="margin: 0; color: #0369a1; font-size: 15px;">
+                                    <span class="dashicons dashicons-chart-pie" style="vertical-align: middle;"></span> ارزیابی سلامت محتوا و آمادگی هوش مصنوعی (Scorecard)
+                                </h3>
+                                <div id="res_score_badges" style="display: flex; gap: 8px;"></div>
+                            </div>
+                            <ul id="res_score_strengths" style="margin: 0; padding-right: 20px; color: #0c4a6e; font-size: 13px;"></ul>
                         </div>
 
                         <!-- Rank Math Fields -->
@@ -185,7 +213,7 @@ class Pharmacy_EEAT_Admin_Page {
                         <!-- Product Features / Short Description Box (Important!) -->
                         <div class="pharmacy-field" id="res_features_box">
                             <label style="color: #0369a1; font-weight: bold;">
-                                <span class="dashicons dashicons-editor-ul" style="vertical-align: middle;"></span> معرفی ویژگی‌های محصول (توضیحات کوتاه / Short Description ووکامرس):
+                                <span class="dashicons dashicons-editor-ul" style="vertical-align: middle;"></span> معرفی ویژگی‌های محصول (توضیحات کوتاه / Short Description بر اساس AIDA/PAS):
                             </label>
                             <textarea id="res_short_description" rows="4" class="large-text" placeholder="فهرست ویژگی‌های شاخص، ترکیبات و فواید محصول..."></textarea>
                         </div>
@@ -198,13 +226,35 @@ class Pharmacy_EEAT_Admin_Page {
                         <!-- Main Content / Full Product Description Box -->
                         <div class="pharmacy-field">
                             <label style="color: #166534; font-weight: bold;">
-                                <span class="dashicons dashicons-editor-alignright" style="vertical-align: middle;"></span> توضیحات کامل محصول / مقاله (HTML):
+                                <span class="dashicons dashicons-editor-alignright" style="vertical-align: middle;"></span> توضیحات کامل محصول / مقاله (HTML شامل جداول و نکات کلیدی):
                             </label>
                             <div id="res_content_preview" class="pharmacy-article-body"></div>
                             <textarea id="res_post_content" style="display: none;"></textarea>
                         </div>
 
-                        <div class="pharmacy-references-box">
+                        <!-- Internal Linking Silo Recommendations (v3.0 Feature) -->
+                        <div class="pharmacy-internal-links-box" style="background: #fdf4ff; border: 1px solid #f5d0fe; border-radius: 8px; padding: 14px 18px; margin-top: 20px;">
+                            <h3 style="margin-top: 0; color: #86198f; font-size: 15px;">
+                                <span class="dashicons dashicons-networking" style="vertical-align: middle;"></span> پیشنهادات پیوند داخلی هوشمند (Internal Linking & Topic Silo):
+                            </h3>
+                            <div id="res_internal_links_list" style="display: grid; gap: 8px;"></div>
+                        </div>
+
+                        <!-- JSON-LD Schema Box (v3.0 Feature) -->
+                        <div class="pharmacy-schema-box" style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 14px 18px; margin-top: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h3 style="margin: 0; color: #1e293b; font-size: 15px;">
+                                    <span class="dashicons dashicons-code-standards" style="vertical-align: middle;"></span> کد ساختاریافته اسکیما (JSON-LD Schema Markup):
+                                </h3>
+                                <button type="button" class="button button-small" id="btn-copy-schema">
+                                    <span class="dashicons dashicons-clipboard"></span> کپی کد اسکیما
+                                </button>
+                            </div>
+                            <p style="font-size: 12.5px; color: #64748b; margin-top: 0;">این اسکیما به طور خودکار در دیتابیس ذخیره و در متاتگ‌های صفحه سایت تزریق می‌شود.</p>
+                            <textarea id="res_schema_json" rows="6" class="large-text" dir="ltr" readonly style="font-family: monospace; font-size: 12px; background: #fff;"></textarea>
+                        </div>
+
+                        <div class="pharmacy-references-box" style="margin-top: 20px;">
                             <h3><span class="dashicons dashicons-book"></span> مراجع علمی استناد شده:</h3>
                             <ul id="res_references_list"></ul>
                         </div>
@@ -218,14 +268,14 @@ class Pharmacy_EEAT_Admin_Page {
                             <span class="dashicons dashicons-format-chat"></span>
                             <div>
                                 <h3>دستیار هوشمند داروساز (PharmaBot)</h3>
-                                <small>کشف منابع معتبر، پیشنهاد رفرنس‌ها و تحلیل تخصصی</small>
+                                <small>کشف منابع معتبر، تحلیل تداخلات، CRO و سئو پزشکی</small>
                             </div>
                         </div>
 
                         <!-- Chat Messages List -->
                         <div class="pharmacy-chat-messages" id="pharmacy-chat-box">
                             <div class="chat-msg bot-msg">
-                                <p>سلام! من دستیار هوشمند داروساز شما هستم. می‌توانید از من بخواهید معتبرترین مراجع پزشکی (PubMed, Mayo Clinic, FDA) را برای یک دارو یا بیماری معرفی کنم، یا لینک‌های مرجع خارجی را استخراج نمایم.</p>
+                                <p>سلام! من دستیار هوشمند داروساز شما هستم. می‌توانید از من بخواهید معتبرترین مراجع پزشکی (PubMed, Mayo Clinic, FDA) را برای یک دارو یا بیماری معرفی کنم، استراتژی سئو و نگارش بدهم، یا متن‌های شما را با تکنیک‌های CRO بازنویسی کنم.</p>
                             </div>
                         </div>
 
@@ -233,7 +283,8 @@ class Pharmacy_EEAT_Admin_Page {
                         <div class="pharmacy-chat-quick-prompts">
                             <button type="button" class="quick-prompt-btn" data-prompt="معتبرترین مقالات و لینک‌های علمی مایوکلینیک و پاب‌مد برای داروی ">معرفی مراجع یک دارو</button>
                             <button type="button" class="quick-prompt-btn" data-prompt="تداخلات دارویی خطرناک و مهم این ترکیب را بررسی و منبع معتبر معرفی کن: ">بررسی تداخلات دارویی</button>
-                            <button type="button" class="quick-prompt-btn" data-prompt="سرفصل‌های استاندارد پزشکی بر اساس E-E-A-T برای این موضوع بچین: ">طراحی سرفصل مقاله</button>
+                            <button type="button" class="quick-prompt-btn" data-prompt="ایده‌های کپی‌رایتینگ و تبدیل فروش (CRO) برای صفحه محصول این مکمل: ">مشاوره تبدیل فروش (CRO)</button>
+                            <button type="button" class="quick-prompt-btn" data-prompt="سرفصل‌های استاندارد پزشکی بر اساس E-E-A-T و GEO برای این موضوع بچین: ">طراحی سرفصل مقاله</button>
                         </div>
 
                         <!-- Chat Input Box -->
