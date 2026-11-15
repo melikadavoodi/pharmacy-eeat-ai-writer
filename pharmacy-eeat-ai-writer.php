@@ -435,7 +435,11 @@ class Pharmacy_EEAT_Plugin {
             update_post_meta($post_id, 'rank_math_description', sanitize_text_field($result['rank_math_description']));
         }
 
-        wp_send_json_success('متای رنک‌مث با موفقیت آپدیت شد.');
+        wp_send_json_success(array(
+            'rank_math_title' => $result['rank_math_title'] ?? '',
+            'rank_math_desc'  => $result['rank_math_description'] ?? '',
+            'message'         => 'متای رنک‌مث با موفقیت آپدیت شد.'
+        ));
     }
 }
 
