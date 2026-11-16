@@ -8,7 +8,7 @@ class Pharmacy_EEAT_AI_Service {
     public static function generate_content($params) {
         $api_provider = get_option('pharmacy_ai_provider', 'openrouter');
         $api_key      = get_option('pharmacy_ai_api_key', '');
-        $model        = get_option('pharmacy_ai_model', 'google/gemini-2.5-flash');
+        $model        = !empty($params['model']) ? sanitize_text_field($params['model']) : get_option('pharmacy_ai_model', 'google/gemini-2.5-flash');
         $proxy_base   = get_option('pharmacy_ai_api_proxy', '');
 
         if (empty($api_key)) {
@@ -79,7 +79,7 @@ class Pharmacy_EEAT_AI_Service {
     public static function chat_message($messages) {
         $api_provider = get_option('pharmacy_ai_provider', 'openrouter');
         $api_key      = get_option('pharmacy_ai_api_key', '');
-        $model        = get_option('pharmacy_ai_model', 'google/gemini-2.5-flash');
+        $model        = !empty($params['model']) ? sanitize_text_field($params['model']) : get_option('pharmacy_ai_model', 'google/gemini-2.5-flash');
         $proxy_base   = get_option('pharmacy_ai_api_proxy', '');
 
         if (empty($api_key)) {
