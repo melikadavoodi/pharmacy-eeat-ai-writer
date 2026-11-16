@@ -2,8 +2,8 @@
 /**
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
  * Plugin URI: https://drdarabipharmacy.com
- * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با متدولوژی‌های GEO (هوش مصنوعی گوگل)، CRO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، اسکیما JSON-LD، بازیابی خودکار (Auto-Save)، پشتیبانی از لحن‌های چندگانه و ترکیبی برند و پیوند داخلی هوشمند.
- * Version: 3.4.0
+ * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با متدولوژی‌های GEO (هوش مصنوعی گوگل)، CRO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر، تمایز فراتر از محصول و مراجع کلیک‌خور PubMed/Mayo Clinic.
+ * Version: 3.5.0
  * Author: تیم سئو و هوش مصنوعی دارابی
  * Author URI: https://drdarabipharmacy.com
  * Text Domain: pharmacy-eeat-ai
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '3.4.0');
+define('PHARMACY_EEAT_VERSION', '3.5.0');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
@@ -205,10 +205,11 @@ class Pharmacy_EEAT_Plugin {
             'focus_keyword'   => sanitize_text_field($_POST['focus_keyword'] ?? ''),
             'word_count'      => intval($_POST['word_count'] ?? 1500),
             'tone'            => $tone,
-            'brand_pov'       => sanitize_text_field($_POST['brand_pov'] ?? 'first_plural'),
-            'reading_level'   => sanitize_text_field($_POST['reading_level'] ?? 'general'),
-            'seo_strategy'    => sanitize_text_field($_POST['seo_strategy'] ?? 'geo_ai_search'),
-            'target_audience' => sanitize_text_field($_POST['target_audience'] ?? 'general'),
+            'brand_pov'            => sanitize_text_field($_POST['brand_pov'] ?? 'first_plural'),
+            'reading_level'        => sanitize_text_field($_POST['reading_level'] ?? 'general'),
+            'seo_strategy'         => sanitize_text_field($_POST['seo_strategy'] ?? 'geo_ai_search'),
+            'brand_image_strategy' => sanitize_text_field($_POST['brand_image_strategy'] ?? 'beyond_product_holistic'),
+            'target_audience'      => sanitize_text_field($_POST['target_audience'] ?? 'general'),
         );
 
         $result = Pharmacy_EEAT_AI_Service::generate_content($params);
@@ -320,6 +321,16 @@ class Pharmacy_EEAT_Plugin {
         }
         if (!empty($scorecard)) {
             update_post_meta($post_id, '_pharmacy_ai_scorecard', $scorecard);
+        }
+
+        // Save Kotler Brand Image & Value-Add Meta (v3.5.0)
+        $brand_message = sanitize_text_field($_POST['brand_message'] ?? '');
+        $beyond_value  = wp_kses_post($_POST['beyond_product_value'] ?? '');
+        if (!empty($brand_message)) {
+            update_post_meta($post_id, '_pharmacy_ai_brand_message', $brand_message);
+        }
+        if (!empty($beyond_value)) {
+            update_post_meta($post_id, '_pharmacy_ai_beyond_product', $beyond_value);
         }
 
         wp_send_json_success(array(
