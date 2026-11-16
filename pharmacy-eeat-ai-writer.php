@@ -3,7 +3,7 @@
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
  * Plugin URI: https://drdarabipharmacy.com
  * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با متدولوژی‌های GEO (هوش مصنوعی گوگل)، CRO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر، تمایز فراتر از محصول و مراجع کلیک‌خور PubMed/Mayo Clinic.
- * Version: 3.6.1
+ * Version: 3.7.0
  * Author: تیم سئو و هوش مصنوعی دارابی
  * Author URI: https://drdarabipharmacy.com
  * Text Domain: pharmacy-eeat-ai
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '3.6.1');
+define('PHARMACY_EEAT_VERSION', '3.7.0');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
@@ -213,6 +213,8 @@ class Pharmacy_EEAT_Plugin {
             'reading_level'        => sanitize_text_field($_POST['reading_level'] ?? 'general'),
             'seo_strategy'         => sanitize_text_field($_POST['seo_strategy'] ?? 'geo_ai_search'),
             'brand_image_strategy' => sanitize_text_field($_POST['brand_image_strategy'] ?? 'beyond_product_holistic'),
+            'ground_truth'         => sanitize_textarea_field($_POST['ground_truth'] ?? ''),
+            'product_image_b64'    => isset($_POST['product_image_b64']) ? $_POST['product_image_b64'] : '',
             'target_audience'      => sanitize_text_field($_POST['target_audience'] ?? 'general'),
         );
 
