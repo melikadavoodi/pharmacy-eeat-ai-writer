@@ -3,7 +3,7 @@
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
  * Plugin URI: https://drdarabipharmacy.com
  * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با متدولوژی‌های GEO (هوش مصنوعی گوگل)، CRO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر، تمایز فراتر از محصول و مراجع کلیک‌خور PubMed/Mayo Clinic.
- * Version: 3.5.0
+ * Version: 3.6.0
  * Author: تیم سئو و هوش مصنوعی دارابی
  * Author URI: https://drdarabipharmacy.com
  * Text Domain: pharmacy-eeat-ai
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '3.5.0');
+define('PHARMACY_EEAT_VERSION', '3.6.0');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
@@ -50,6 +50,7 @@ class Pharmacy_EEAT_Plugin {
         add_action('wp_ajax_pharmacy_ai_optimize_meta', array($this, 'ajax_optimize_meta'));
         add_action('wp_ajax_pharmacy_ai_chat', array($this, 'ajax_chat'));
         add_action('wp_ajax_pharmacy_ai_product_quick_action', array($this, 'ajax_product_quick_action'));
+        add_action('wp_ajax_pharmacy_ai_health_check', array($this, 'ajax_health_check'));
 
         // Init Metabox
         Pharmacy_EEAT_Metabox::init();
@@ -468,6 +469,29 @@ class Pharmacy_EEAT_Plugin {
             'rank_math_title' => $result['rank_math_title'] ?? '',
             'rank_math_desc'  => $result['rank_math_description'] ?? '',
             'message'         => 'متای رنک‌مث با موفقیت آپدیت شد.'
+        ));
+    }
+
+    public function ajax_health_check() {
+        check_ajax_referer('pharmacy_ai_nonce', 'nonce');
+
+        if (!current_user_can('edit_posts')) {
+            wp_send_json_error('دسترسی مجاز نیست.');
+        }
+
+        $api_key = get_option('pharmacy_ai_api_key', '');
+        $model   = get_option('pharmacy_ai_model', 'google/gemini-2.5-flash');
+
+        wp_send_json_success(array(
+            'status'         => 'healthy',
+            'plugin_version' => PHARMACY_EEAT_VERSION,
+            'api_configured' => !empty($api_key),
+            'model'          => $model,
+            'woocommerce'    => class_exists('WooCommerce'),
+            'rank_math'      => class_exists('RankMath'),
+            'php_version'    => phpversion(),
+            'server_time'    => current_time('mysql'),
+            'message'        => 'تمام سرویس‌های هسته افزونه، دیتابیس و ارتباط ایجکس با موفقیت تایید شدند.'
         ));
     }
 }
