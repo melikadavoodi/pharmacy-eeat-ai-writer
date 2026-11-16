@@ -24,9 +24,10 @@ class Pharmacy_EEAT_AI_Service {
         $word_count      = isset($params['word_count']) ? intval($params['word_count']) : 1500;
         $tone            = isset($params['tone']) ? sanitize_text_field($params['tone']) : 'medical_consultant';
         $brand_pov       = isset($params['brand_pov']) ? sanitize_text_field($params['brand_pov']) : 'first_plural';
-        $reading_level   = isset($params['reading_level']) ? sanitize_text_field($params['reading_level']) : 'general';
-        $seo_strategy    = isset($params['seo_strategy']) ? sanitize_text_field($params['seo_strategy']) : 'geo_ai_search';
-        $target_audience = isset($params['target_audience']) ? sanitize_text_field($params['target_audience']) : 'general';
+        $reading_level        = isset($params['reading_level']) ? sanitize_text_field($params['reading_level']) : 'general';
+        $seo_strategy         = isset($params['seo_strategy']) ? sanitize_text_field($params['seo_strategy']) : 'geo_ai_search';
+        $brand_image_strategy = isset($params['brand_image_strategy']) ? sanitize_text_field($params['brand_image_strategy']) : 'beyond_product_holistic';
+        $target_audience      = isset($params['target_audience']) ? sanitize_text_field($params['target_audience']) : 'general';
 
         $reviewer_name  = get_option('pharmacy_ai_reviewer_name', 'دکتر داروساز');
         $reviewer_code  = get_option('pharmacy_ai_reviewer_code', '۱۲۳۴۵');
@@ -50,8 +51,8 @@ class Pharmacy_EEAT_AI_Service {
             $fetched_sources_text = $source_text;
         }
 
-        $system_instruction = self::build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt);
-        $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $fetched_sources_text, $clean_urls);
+        $system_instruction = self::build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt);
+        $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $fetched_sources_text, $clean_urls);
 
         if ($api_provider === 'openrouter') {
             return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt);
@@ -110,7 +111,7 @@ class Pharmacy_EEAT_AI_Service {
         return mb_substr(trim($clean), 0, 10000);
     }
 
-    private static function build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt) {
+    private static function build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt) {
         $tones_desc = array(
             'medical_consultant'   => 'مشاوره‌ای، دلسوزانه و امین داروخانه‌ای (همانند گفت‌وگوی صمیمانه، گرم و اطمینان‌بخش دکتر داروساز پشت پیشخوان با بیمار)',
             'clinical_evidence'    => 'بسیار علمی، بالینی، آکادمیک و متکی بر کارآزمایی‌های بالینی رسمی بدون مبالغه (Evidence-Based Medicine)',
@@ -155,6 +156,42 @@ class Pharmacy_EEAT_AI_Service {
             'clinical_specialist' => 'تخصصی بالینی و فارماکولوژیک: متنی عمیق با اصطلاحات دقیق پزشکی مناسب کادر درمان و بیماران پیگیر.'
         );
         $selected_level_desc = $level_desc[$reading_level] ?? $level_desc['general'];
+
+        // Kotler Brand Image Matrix & Uncopyable Differentiation (v3.5.0)
+        $brand_image_map = array(
+            'beyond_product_holistic' => "دکترین فراتر از محصول و ارزش جامع (Beyond the Product - ارزش غیرقابل تقلید):
+- چون این محصول در تمام داروخانه‌های کشور موجود است، بازتولید بروشور بی‌ارزش است. محتوای شما باید یک 'پروتکل ۳۶۰ درجه سبک زندگی و سلامت' باشد که هیچ رقیبی قادر به کپی‌برداری از آن نباشد.
+- الزامات:
+  ۱. بیولوژی و سینرژی جذب (Nutritional Synergy & Chronobiology): چه مواد غذایی جذب این دارو را چند برابر می‌کنند و چه چیزهایی اثر آن را خنثی می‌کنند؟ بهترین ساعت بیولوژیک مصرف در شبانه‌روز کدام است؟
+  ۲. عادات تغذیه‌ای و تمرینات مکمل همراه برای دستیابی به حداکثر بازدهی بالینی.
+  ۳. پایش بالینی و جدول زمانی نتایج واقعی (Timeline of Results): در هفته اول، ماه اول و پایان دوره مصرف دقیقاً چه انتظاراتی باید داشت.
+  ۴. کادر تمایز بالینی: درون 'content' حتماً یک کادر برجسته با کلاس 'pharmacy-brand-differentiator' قرار دهید با عنوان «پروتکل جذب حداکثری و ارزش اختصاصی داروخانه دکتر دارابی».",
+
+            'functional_safety' => "تصویر عملکردی و اصالت بالینی (Functional & Clinical Trust):
+- تمرکز بر رفع دغدغه اصالت دارو در بازار ایران: اصالت ۱۰۰٪ کالا، شرایط استاندارد نگهداری در دمای کنترل‌شده انبار دارویی، برچسب رهگیری و کنترل اصالت غذا و دارو (TTAC).
+- تشریح دقیق فارماکوکینتیک، عدم ایجاد سمیت دارویی، تضمین عاری بودن از ناخالصی و تطبیق با استانداردهای دارونامه (USP/BP).
+- درون 'content' یک کادر 'pharmacy-brand-differentiator' با عنوان «ضمانت اصالت و سلامت بیولوژیک داروخانه دکتر دارابی» درج شود.",
+
+            'emotional_wellbeing' => "تصویر احساسی و آرامش‌بخش (Emotional Wellbeing & Empathy):
+- بر پایه اصل اسکات کوک: «یک برند آن چیزی نیست که ما به مشتری می‌گوییم؛ بلکه آن چیزی است که مشتریان به یکدیگر می‌گویند.»
+- تبدیل حس اضطراب بیماری یا پیری به احساس امنیت، آرامش، کرامت انسانی، امید واقعی و مراقبت دلسوزانه.
+- مخاطب باید حس کند مشاور داروساز امین و مهربانی در کنار او نشسته و دغدغه‌های روحی‌اش را درک می‌کند.
+- درون 'content' یک کادر 'pharmacy-brand-differentiator' با عنوان «پیام امید و مراقبت تیم داروسازی دکتر دارابی» درج شود.",
+
+            'personal_smart_choice' => "تصویر هویت شخصی و سبک زندگی آگاهانه (Personal Identity & Smart Choice):
+- ارتقای هویت فردی: انتخاب این محصول از داروخانه دکتر دارابی نشانه درایت، سواد سلامت و خودمراقبتی هوشمندانه خریدار است.
+- درون 'content' یک کادر 'pharmacy-brand-differentiator' با عنوان «انتخاب هوشمندانه برای سلامت اصیل» درج شود.",
+
+            'user_lifestyle_story' => "تصویر سناریوی کاربر واقعی (User Persona & Real-Life Context):
+- ترسیم داستان روزمره افرادی که با این چالش مواجه‌اند (مادر پرمشغله، کارمند دچار خستگی مزمن، ورزشکار، سالمند باانگیزه).
+- نشان دادن اینکه این محصول چگونه گلوگاه‌های زندگی روزمره را حل می‌کند.
+- درون 'content' یک کادر 'pharmacy-brand-differentiator' با عنوان «تجربه واقعی بهبود کیفیت زندگی» درج شود.",
+
+            'social_prestige' => "تصویر اجتماعی و نمادین (Social Prestige & Health Leadership):
+- ارتقای جایگاه اجتماعی و پرستیژ فرد در انتخاب استاندارد اصیل جهانی GMP اروپا و نماد سرآمدی و رهبری در سلامت فردی.
+- درون 'content' یک کادر 'pharmacy-brand-differentiator' با عنوان «استاندارد برتر و جایگاه سلامت پایدار» درج شود."
+        );
+        $selected_brand_image_instruction = $brand_image_map[$brand_image_strategy] ?? $brand_image_map['beyond_product_holistic'];
 
         // SEO & Copywriting Strategy Directives
         $strategy_instructions = '';
@@ -202,6 +239,9 @@ class Pharmacy_EEAT_AI_Service {
 زاویه دید راوی (Point of View): {$selected_pov_desc}.
 سطح تخصصی زبان (Language Level): {$selected_level_desc}.
 
+استراتژی ساخت تصویر برند و ارزش فراتر از محصول (Kotler Brand Image & Differentiation):
+{$selected_brand_image_instruction}
+
 اصول ویرایشی و زبان فارسی (Persian Voice & Iranian Market Rules):
 ۱. تمام متن باید به زبان فارسی فاخر، شیوا، گرم و تخصصی نگارش شود.
 ۲. رعایت دقیق نیم‌فاصله‌ها در تمام کلمات مرکب و افعال الزامی است (مثال: «می‌شود»، «داروخانه‌ای»، «ترکیب‌ها»، «دسته‌بندی»، «به‌ویژه»).
@@ -237,6 +277,8 @@ class Pharmacy_EEAT_AI_Service {
 {
   \"title\": \"عنوان کامل و جذاب مقاله یا محصول\",
   \"short_description\": \"فهرست گلوله‌ای ویژگی‌های شاخص و مزایای برجسته برای باکس ویژگی‌های ووکامرس (HTML ul/li)\",
+  \"brand_message\": \"پیام محوری و ماندگار برند داروخانه دکتر دارابی متناسب با استراتژی تصویر برند انتخابی\",
+  \"beyond_product_value\": \"خلاصه نکات طلایی پروتکل سبک زندگی، هم‌افزایی جذب و ارزش افزوده فراتر از دارو\",
   \"rank_math_title\": \"عنوان سئو رنک‌مث (زیر ۶۰ کاراکتر)\",
   \"rank_math_description\": \"توضیحات متای رنک‌مث (۱۳۰ تا ۱۵۵ کاراکتر)\",
   \"rank_math_focus_keyword\": \"کلمه کلیدی کانونی\",
@@ -270,7 +312,7 @@ class Pharmacy_EEAT_AI_Service {
 }";
     }
 
-    private static function build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $sources_text, $clean_urls) {
+    private static function build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $sources_text, $clean_urls) {
         $prompt = "لطفاً با توجه به استراتژی‌های مدرن تعیین‌شده، محتوای تخصصی زیر را تدوین کرده و در قالب شیء JSON خواسته شده تحویل دهید:\n\n";
         $prompt .= "- نوع سند: " . $content_type . "\n";
         $prompt .= "- موضوع / نام دارو یا محصول: " . ($topic ? $topic : 'بر اساس منابع ورودی') . "\n";
@@ -278,6 +320,7 @@ class Pharmacy_EEAT_AI_Service {
             $prompt .= "- کلمه کلیدی کانونی (Focus Keyword): " . $focus_keyword . "\n";
         }
         $prompt .= "- استراتژی محتوا: " . $seo_strategy . "\n";
+        $prompt .= "- استراتژی تصویر برند و تمایز رقابتی: " . $brand_image_strategy . "\n";
         $prompt .= "- حجم تقریبی متن: " . $word_count . " کلمه\n";
         $prompt .= "- مخاطب هدف: " . $target_audience . "\n";
 
@@ -600,6 +643,12 @@ class Pharmacy_EEAT_AI_Service {
         }
         if (preg_match('/"excerpt"\s*:\s*"([^"]+)"/u', $clean_json, $m)) {
             $extracted['excerpt'] = trim($m[1]);
+        }
+        if (preg_match('/"brand_message"\s*:\s*"([^"]+)"/u', $clean_json, $m)) {
+            $extracted['brand_message'] = trim($m[1]);
+        }
+        if (preg_match('/"beyond_product_value"\s*:\s*"(.*?)(?:"\s*,\s*"|"\s*,\s*\n\s*"|"\s*\})/us', $clean_json, $m)) {
+            $extracted['beyond_product_value'] = stripcslashes($m[1]);
         }
         if (preg_match('/"content"\s*:\s*"(.*?)(?:"\s*,\s*"|"\s*,\s*\n\s*"|"\s*\})/us', $clean_json, $m)) {
             $extracted['content'] = stripcslashes($m[1]);
