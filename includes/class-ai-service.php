@@ -30,6 +30,10 @@ class Pharmacy_EEAT_AI_Service {
         $ground_truth         = isset($params['ground_truth']) ? sanitize_textarea_field($params['ground_truth']) : '';
         $product_image_b64    = isset($params['product_image_b64']) ? $params['product_image_b64'] : '';
         $target_audience      = isset($params['target_audience']) ? sanitize_text_field($params['target_audience']) : 'general';
+        $temperature          = isset($params['temperature']) ? floatval($params['temperature']) : 0.7;
+        if ($temperature < 0.1 || $temperature > 1.0) {
+            $temperature = 0.7;
+        }
 
         $reviewer_name  = get_option('pharmacy_ai_reviewer_name', 'دکتر داروساز');
         $reviewer_code  = get_option('pharmacy_ai_reviewer_code', '۱۲۳۴۵');
@@ -57,11 +61,11 @@ class Pharmacy_EEAT_AI_Service {
         $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $fetched_sources_text, $clean_urls);
 
         if ($api_provider === 'openrouter') {
-            return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base, $product_image_b64);
+            return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base, $product_image_b64, $temperature);
         } elseif ($api_provider === 'gemini') {
-            return self::call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base, $product_image_b64);
+            return self::call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base, $product_image_b64, $temperature);
         } else {
-            return self::call_openai($api_key, $model, $system_instruction, $user_prompt, $proxy_base);
+            return self::call_openai($api_key, $model, $system_instruction, $user_prompt, $proxy_base, $temperature);
         }
     }
 
@@ -378,7 +382,7 @@ class Pharmacy_EEAT_AI_Service {
         return $prompt;
     }
 
-    private static function call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '', $product_image_b64 = '') {
+    private static function call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '', $product_image_b64 = '', $temperature = 0.7) {
         $endpoint = !empty($proxy_base) ? rtrim($proxy_base, '/') . '/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
 
         $user_content = $user_prompt;
@@ -397,8 +401,6 @@ class Pharmacy_EEAT_AI_Service {
             );
         }
 
-        $temperature = 0.65;
-
         $body_data = array(
             'model'    => $model,
             'messages' => array(
@@ -406,7 +408,7 @@ class Pharmacy_EEAT_AI_Service {
                 array('role' => 'user', 'content' => $user_content),
             ),
             'response_format' => array('type' => 'json_object'),
-            'temperature'     => $temperature,
+            'temperature'     => floatval($temperature),
             'max_tokens'      => 8000,
         );
 
@@ -514,7 +516,7 @@ class Pharmacy_EEAT_AI_Service {
         return new WP_Error('api_error', 'خطا در ارتباط با اوپن‌روتر: ' . $last_error);
     }
 
-    private static function call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '', $product_image_b64 = '') {
+    private static function call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '', $product_image_b64 = '', $temperature = 0.7) {
         $base = !empty($proxy_base) ? rtrim($proxy_base, '/') : 'https://generativelanguage.googleapis.com';
         $endpoint = "{$base}/v1beta/models/{$model}:generateContent?key={$api_key}";
 
@@ -540,8 +542,6 @@ class Pharmacy_EEAT_AI_Service {
             }
         }
 
-        $temperature = 0.65;
-
         $body_data = array(
             'system_instruction' => array(
                 'parts' => array(
@@ -556,7 +556,7 @@ class Pharmacy_EEAT_AI_Service {
             'safetySettings' => $safety_settings,
             'generationConfig' => array(
                 'response_mime_type' => 'application/json',
-                'temperature'        => $temperature,
+                'temperature'        => floatval($temperature),
                 'maxOutputTokens'    => 8192,
             )
         );
@@ -640,7 +640,7 @@ class Pharmacy_EEAT_AI_Service {
         return array('reply' => $reply);
     }
 
-    private static function call_openai($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '') {
+    private static function call_openai($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '', $temperature = 0.7) {
         $base = !empty($proxy_base) ? rtrim($proxy_base, '/') : 'https://api.openai.com/v1';
         $endpoint = "{$base}/chat/completions";
 
@@ -651,7 +651,7 @@ class Pharmacy_EEAT_AI_Service {
                 array('role' => 'user', 'content' => $user_prompt),
             ),
             'response_format' => array('type' => 'json_object'),
-            'temperature'     => 0.4,
+            'temperature'     => floatval($temperature),
             'max_tokens'      => 8000,
         );
 
