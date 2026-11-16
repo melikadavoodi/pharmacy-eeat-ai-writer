@@ -11,7 +11,7 @@ class Pharmacy_EEAT_Admin_Page {
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v4.0.0)</h1>
+                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v4.1.0)</h1>
                     <p class="pharmacy-ai-sub" style="margin-top: 0;">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، اعتبارسنجی بالینی چندوجهی (متن و عکس محصول)، تصویر برند کاتلر و آزمون خودکار سلامت</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
@@ -328,13 +328,13 @@ class Pharmacy_EEAT_Admin_Page {
                                             <small style="color: #7e22ce;">می‌توانید مدل‌های مختلف (جمینای پرو، کلود، جی‌پی‌تی ۴) را تست و با هم مقایسه کنید</small>
                                         </div>
                                         <select id="pharmacy_ai_model_selector" name="ai_model" style="width: 100%; font-weight: 500;">
-                                            <option value="google/gemini-2.5-flash" selected>⚡ گوگل جمینای ۲.۵ فلش (سریع، بسیار دقیق و مقرون‌به‌صرفه - پیش‌فرض)</option>
-                                            <option value="google/gemini-1.5-pro">🧠 گوگل جمینای ۱.۵ پرو (استدلال بالینی عمیق، تحلیل چندمنبعی و نگارش غنی)</option>
-                                            <option value="anthropic/claude-3.5-sonnet">🖋️ آنتروپیک کلود ۳.۵ سونات (برترین قلم ادبی، فاخرترین واژگان فارسی و فوق‌العاده شبیه انسان)</option>
-                                            <option value="openai/gpt-4o">🌐 اوپن‌ای‌آی GPT-4o (جامع، رسمی و ساختاریافته)</option>
-                                            <option value="deepseek/deepseek-chat">💡 دیپ‌سیک V3 (مقرون‌به‌صرفه، تحلیلی و پرسرعت)</option>
-                                            <option value="google/gemini-2.0-flash-exp:free">🎁 جمینای ۲ اکسپریمنتال (کاملاً رایگان در اوپن‌روتر - ۰ اعتبار)</option>
-                                            <option value="meta-llama/llama-3.3-70b-instruct:free">🎁 متا لاما ۳.۳ هفتاد میلیاردی (کاملاً رایگان در اوپن‌روتر - ۰ اعتبار)</option>
+                                            <option value="google/gemini-2.5-flash" selected>⚡ گوگل جمینای ۲.۵ فلش (سریع، بسیار ارزان و پایدار - پیش‌فرض)</option>
+                                            <option value="google/gemini-2.5-pro">🧠 گوگل جمینای ۲.۵ پرو (پرچمدار جدید گوگل، استدلال عمیق و بالینی)</option>
+                                            <option value="google/gemini-2.5-flash-lite">🚀 گوگل جمینای ۲.۵ فلش لایت (فوق‌العاده کم‌هزینه و پرسرعت)</option>
+                                            <option value="anthropic/claude-sonnet-4.5">🖋️ آنتروپیک کلود ۴.۵ سونات (برترین قلم ادبی و فاخرترین لحن انسانی)</option>
+                                            <option value="openai/gpt-4o-mini">🌐 اوپن‌ای‌آی GPT-4o Mini (بسیار سبک، ارزان و هوشمند)</option>
+                                            <option value="openai/gpt-4o">💎 اوپن‌ای‌آی GPT-4o (جامع، رسمی و قدرتمند)</option>
+                                            <option value="openrouter/free">🎁 سیستم هوشمند مدل‌های کاملاً رایگان (هزینه ۰ دلار - بدون نیاز به شارژ)</option>
                                             <option value="custom">⚙️ مدل سفارشی دلخواه (تایپ دستی نام مدل)...</option>
                                         </select>
                                         <div id="custom_model_input_wrap" style="display: none; margin-top: 8px;">
