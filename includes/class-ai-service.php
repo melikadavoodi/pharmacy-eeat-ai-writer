@@ -55,7 +55,7 @@ class Pharmacy_EEAT_AI_Service {
         $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $fetched_sources_text, $clean_urls);
 
         if ($api_provider === 'openrouter') {
-            return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt);
+            return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base);
         } elseif ($api_provider === 'gemini') {
             return self::call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base);
         } else {
@@ -81,7 +81,7 @@ class Pharmacy_EEAT_AI_Service {
 ۴. زبان شما فارسی روان، فاخر، با رعایت دقیق نیم‌فاصله‌ها و بدون کلمات ترجمه‌ای رباتیک است.";
 
         if ($api_provider === 'openrouter') {
-            return self::call_openrouter_chat($api_key, $model, $system_prompt, $messages);
+            return self::call_openrouter_chat($api_key, $model, $system_prompt, $messages, $proxy_base);
         } elseif ($api_provider === 'gemini') {
             return self::call_gemini_chat($api_key, $model, $system_prompt, $messages, $proxy_base);
         } else {
@@ -337,8 +337,8 @@ class Pharmacy_EEAT_AI_Service {
         return $prompt;
     }
 
-    private static function call_openrouter($api_key, $model, $system_instruction, $user_prompt) {
-        $endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+    private static function call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '') {
+        $endpoint = !empty($proxy_base) ? rtrim($proxy_base, '/') . '/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
 
         $body_data = array(
             'model'    => $model,
@@ -351,36 +351,52 @@ class Pharmacy_EEAT_AI_Service {
             'max_tokens'      => 8000,
         );
 
-        $response = wp_remote_post($endpoint, array(
-            'headers' => array(
-                'Content-Type'  => 'application/json',
-                'Authorization' => 'Bearer ' . $api_key,
-                'HTTP-Referer'  => 'https://drdarabipharmacy.com',
-                'X-Title'       => 'Dr Darabi Pharmacy AI Writer Pro',
-            ),
-            'body'    => wp_json_encode($body_data),
-            'timeout' => 120,
-        ));
+        $max_retries = 3;
+        $last_error  = '';
 
-        if (is_wp_error($response)) {
-            return new WP_Error('api_error', 'خطا در ارتباط با اوپن‌روتر: ' . $response->get_error_message());
+        for ($attempt = 1; $attempt <= $max_retries; $attempt++) {
+            $response = wp_remote_post($endpoint, array(
+                'headers'     => array(
+                    'Content-Type'  => 'application/json',
+                    'Authorization' => 'Bearer ' . $api_key,
+                    'HTTP-Referer'  => 'https://drdarabipharmacy.com',
+                    'X-Title'       => 'Dr Darabi Pharmacy AI Writer Pro',
+                    'Connection'    => 'close',
+                    'Accept'        => 'application/json',
+                ),
+                'body'        => wp_json_encode($body_data),
+                'timeout'     => 120,
+                'httpversion' => '1.1',
+                'sslverify'   => false,
+            ));
+
+            if (is_wp_error($response)) {
+                $last_error = $response->get_error_message();
+                if ($attempt < $max_retries) {
+                    sleep(2 * $attempt);
+                    continue;
+                }
+                return new WP_Error('api_error', 'خطا در ارتباط با اوپن‌روتر پس از ' . $max_retries . ' بار تلاش: ' . $last_error . ' (نکته: در صورت تکرار اختلال اینترنت هاست، می‌توانید در منوی تنظیمات افزونه از آدرس پروکسی ورکر کلادفلر استفاده کنید).');
+            }
+
+            $code = wp_remote_retrieve_response_code($response);
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+
+            if ($code !== 200) {
+                $err_msg = isset($data['error']['message']) ? $data['error']['message'] : "کد وضعیت HTTP: {$code}";
+                return new WP_Error('openrouter_error', 'خطای اوپن‌روتر: ' . $err_msg);
+            }
+
+            $raw_text = $data['choices'][0]['message']['content'] ?? '';
+            return self::parse_json_result($raw_text);
         }
 
-        $code = wp_remote_retrieve_response_code($response);
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-
-        if ($code !== 200) {
-            $err_msg = isset($data['error']['message']) ? $data['error']['message'] : "کد وضعیت HTTP: {$code}";
-            return new WP_Error('openrouter_error', 'خطای اوپن‌روتر: ' . $err_msg);
-        }
-
-        $raw_text = $data['choices'][0]['message']['content'] ?? '';
-        return self::parse_json_result($raw_text);
+        return new WP_Error('api_error', 'خطا در ارتباط با اوپن‌روتر: ' . $last_error);
     }
 
-    private static function call_openrouter_chat($api_key, $model, $system_prompt, $messages) {
-        $endpoint = 'https://openrouter.ai/api/v1/chat/completions';
+    private static function call_openrouter_chat($api_key, $model, $system_prompt, $messages, $proxy_base = '') {
+        $endpoint = !empty($proxy_base) ? rtrim($proxy_base, '/') . '/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
 
         $formatted = array(array('role' => 'system', 'content' => $system_prompt));
         foreach ($messages as $msg) {
@@ -397,30 +413,46 @@ class Pharmacy_EEAT_AI_Service {
             'max_tokens'  => 2000,
         );
 
-        $response = wp_remote_post($endpoint, array(
-            'headers' => array(
-                'Content-Type'  => 'application/json',
-                'Authorization' => 'Bearer ' . $api_key,
-                'HTTP-Referer'  => 'https://drdarabipharmacy.com',
-                'X-Title'       => 'Dr Darabi Pharmacy AI Chat',
-            ),
-            'body'    => wp_json_encode($body_data),
-            'timeout' => 60,
-        ));
+        $max_retries = 3;
+        $last_error  = '';
 
-        if (is_wp_error($response)) {
-            return new WP_Error('api_error', $response->get_error_message());
+        for ($attempt = 1; $attempt <= $max_retries; $attempt++) {
+            $response = wp_remote_post($endpoint, array(
+                'headers'     => array(
+                    'Content-Type'  => 'application/json',
+                    'Authorization' => 'Bearer ' . $api_key,
+                    'HTTP-Referer'  => 'https://drdarabipharmacy.com',
+                    'X-Title'       => 'Dr Darabi Pharmacy AI Chat',
+                    'Connection'    => 'close',
+                    'Accept'        => 'application/json',
+                ),
+                'body'        => wp_json_encode($body_data),
+                'timeout'     => 60,
+                'httpversion' => '1.1',
+                'sslverify'   => false,
+            ));
+
+            if (is_wp_error($response)) {
+                $last_error = $response->get_error_message();
+                if ($attempt < $max_retries) {
+                    sleep(2);
+                    continue;
+                }
+                return new WP_Error('api_error', 'خطا در چت پس از چند تلاش: ' . $last_error);
+            }
+
+            $body = wp_remote_retrieve_body($response);
+            $data = json_decode($body, true);
+
+            if (isset($data['error'])) {
+                return new WP_Error('openrouter_error', $data['error']['message'] ?? 'خطای ناشناخته');
+            }
+
+            $reply = $data['choices'][0]['message']['content'] ?? '';
+            return array('reply' => $reply);
         }
 
-        $body = wp_remote_retrieve_body($response);
-        $data = json_decode($body, true);
-
-        if (isset($data['error'])) {
-            return new WP_Error('openrouter_error', $data['error']['message'] ?? 'خطای ناشناخته');
-        }
-
-        $reply = $data['choices'][0]['message']['content'] ?? '';
-        return array('reply' => $reply);
+        return new WP_Error('api_error', 'خطا در ارتباط با اوپن‌روتر: ' . $last_error);
     }
 
     private static function call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '') {
