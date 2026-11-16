@@ -9,9 +9,28 @@ class Pharmacy_EEAT_Admin_Page {
         $api_key = get_option('pharmacy_ai_api_key', '');
         ?>
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
-            <div class="pharmacy-ai-header">
-                <h1>استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.5.0)</h1>
-                <p class="pharmacy-ai-sub">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر و تمایز بالینی غیرقابل تقلید</p>
+            <div class="pharmacy-ai-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div>
+                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.6.0)</h1>
+                    <p class="pharmacy-ai-sub" style="margin-top: 0;">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر و ماژول خودکار سلامت پلتفرم</p>
+                </div>
+                <div style="display: flex; gap: 10px; align-items: center;">
+                    <button type="button" class="button button-secondary" id="btn-run-diagnostics" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; height: auto; font-weight: bold; border-color: #0284c7; color: #0284c7;">
+                        <span class="dashicons dashicons-shield" style="font-size: 18px; width: 18px; height: 18px; vertical-align: middle;"></span> عیب‌یابی و تست خودکار سلامت پلتفرم
+                    </button>
+                </div>
+            </div>
+
+            <!-- Automated Health Diagnostics Box (v3.6.0) -->
+            <div id="pharmacy-diagnostics-box" style="display: none; background: #f8fafc; border: 1px solid #cbd5e1; border-right: 5px solid #0284c7; border-radius: 8px; padding: 16px 20px; margin-bottom: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; border-bottom: 1px solid #e2e8f0; padding-bottom: 8px;">
+                    <h3 style="margin: 0; color: #0369a1; font-size: 15px; display: flex; align-items: center; gap: 6px;">
+                        <span class="dashicons dashicons-yes-alt" style="color: #0284c7;"></span> گزارش زنده عیب‌یابی و آزمون سلامت پلتفرم
+                    </h3>
+                    <button type="button" class="button button-small" id="btn-close-diagnostics">بستن گزارش</button>
+                </div>
+                <div id="diagnostics-steps-list" style="display: grid; gap: 8px; font-size: 13.5px;"></div>
+                <div id="diagnostics-summary" style="margin-top: 12px; padding: 10px; border-radius: 6px; font-weight: bold; font-size: 13px; display: none;"></div>
             </div>
 
             <?php if (empty($api_key)) : ?>
@@ -446,6 +465,53 @@ class Pharmacy_EEAT_Admin_Page {
                     </div>
                 </div>
             </div>
+
+            <!-- Instant Fallback Click Handler (Guarantees zero-lag UI responsiveness) -->
+            <script>
+            (function() {
+                function initInstantPills() {
+                    var pills = document.querySelectorAll('.type-pill');
+                    if (!pills || !pills.length) return;
+                    pills.forEach(function(pill) {
+                        pill.addEventListener('click', function(e) {
+                            e.preventDefault();
+                            pills.forEach(function(p) { p.classList.remove('active'); });
+                            pill.classList.add('active');
+                            var type = pill.getAttribute('data-type') || 'blog_post';
+                            var hiddenInput = document.getElementById('pharmacy_content_type');
+                            if (hiddenInput) hiddenInput.value = type;
+
+                            var existingRow = document.getElementById('existing_product_row');
+                            var wordsInput = document.getElementById('pharmacy_words');
+                            var topicInput = document.getElementById('pharmacy_topic');
+                            var featuresBox = document.getElementById('res_features_box');
+
+                            if (type === 'product') {
+                                if (wordsInput) wordsInput.value = '800';
+                                if (topicInput) topicInput.placeholder = 'مثال: کپسول کلاژن پلاس ال لیزین یوروویتال (۶۰ عددی)';
+                                if (existingRow) existingRow.style.display = 'block';
+                                if (featuresBox) featuresBox.style.display = 'block';
+                            } else if (type === 'category') {
+                                if (wordsInput) wordsInput.value = '800';
+                                if (topicInput) topicInput.placeholder = 'مثال: مکمل‌های تقویت پوست، مو و ناخن';
+                                if (existingRow) existingRow.style.display = 'none';
+                                if (featuresBox) featuresBox.style.display = 'none';
+                            } else {
+                                if (wordsInput) wordsInput.value = '1500';
+                                if (topicInput) topicInput.placeholder = 'مثال: کپسول گاباپنتین؛ موارد مصرف، دوز و عوارض جانبی';
+                                if (existingRow) existingRow.style.display = 'none';
+                                if (featuresBox) featuresBox.style.display = 'none';
+                            }
+                        });
+                    });
+                }
+                if (document.readyState === 'loading') {
+                    document.addEventListener('DOMContentLoaded', initInstantPills);
+                } else {
+                    initInstantPills();
+                }
+            })();
+            </script>
         </div>
         <?php
     }
