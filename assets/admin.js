@@ -863,6 +863,51 @@ jQuery(document).ready(function ($) {
         } catch (e) {}
     })();
 
+    // Start New Product / Reset Form
+    function resetFormForNewProduct() {
+        if (!confirm('آیا مایلید فرم برای شروع محصول جدید پاکسازی شود؟\n(در صورتی که محتوای تولیدشده را ذخیره نکرده‌اید، ابتدا روی دکمه ذخیره مستقیم کلیک کنید)')) {
+            return;
+        }
+
+        // Clear input values
+        $('#pharmacy_topic').val('');
+        $('#pharmacy_target_product').val('');
+        $('#pharmacy_keyword').val('');
+        $('#pharmacy_ground_truth').val('');
+        $('#pharmacy_source_text').val('');
+        $('#pharmacy-urls-repeater .url-input-row:not(:first)').remove();
+        $('#pharmacy-urls-repeater input[type="url"]').val('');
+        updateUrlRemoveButtons();
+
+        // Clear image
+        $('#pharmacy_product_image_input').val('');
+        $('#pharmacy_product_image_b64').val('');
+        $('#product_image_preview').attr('src', '');
+        $('#product_image_preview_wrap').hide();
+        $('#btn-remove-product-image').hide();
+        $('#btn-upload-product-image').html('<span class="dashicons dashicons-upload"></span> انتخاب و بارگذاری عکس محصول (JPG / PNG)');
+
+        // Clear saved input draft
+        try {
+            localStorage.removeItem('pharmacy_ai_input_draft');
+        } catch (e) {}
+
+        // Hide result container
+        $('#pharmacy-result-container').slideUp(250);
+
+        // Scroll up to form and focus
+        if ($('#pharmacy-ai-generate-form').length) {
+            $('html, body').animate({
+                scrollTop: $('#pharmacy-ai-generate-form').offset().top - 80
+            }, 400);
+        }
+        $('#pharmacy_topic').focus();
+    }
+
+    $('#btn-reset-form-top, #btn-start-new-product').on('click', function () {
+        resetFormForNewProduct();
+    });
+
     $('#btn-close-diagnostics').on('click', function () {
         $('#pharmacy-diagnostics-box').slideUp(250);
     });
