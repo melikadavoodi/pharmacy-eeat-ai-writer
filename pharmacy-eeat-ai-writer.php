@@ -3,7 +3,7 @@
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
  * Plugin URI: https://drdarabipharmacy.com
  * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با متدولوژی‌های GEO (هوش مصنوعی گوگل)، CRO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر، تمایز فراتر از محصول و مراجع کلیک‌خور PubMed/Mayo Clinic.
- * Version: 3.6.0
+ * Version: 3.6.1
  * Author: تیم سئو و هوش مصنوعی دارابی
  * Author URI: https://drdarabipharmacy.com
  * Text Domain: pharmacy-eeat-ai
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '3.6.0');
+define('PHARMACY_EEAT_VERSION', '3.6.1');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
@@ -51,6 +51,9 @@ class Pharmacy_EEAT_Plugin {
         add_action('wp_ajax_pharmacy_ai_chat', array($this, 'ajax_chat'));
         add_action('wp_ajax_pharmacy_ai_product_quick_action', array($this, 'ajax_product_quick_action'));
         add_action('wp_ajax_pharmacy_ai_health_check', array($this, 'ajax_health_check'));
+
+        // Network resilience & cURL optimization for Iranian hosting & OpenRouter
+        add_action('http_api_curl', array($this, 'optimize_curl_handle'), 10, 3);
 
         // Init Metabox
         Pharmacy_EEAT_Metabox::init();
@@ -493,6 +496,17 @@ class Pharmacy_EEAT_Plugin {
             'server_time'    => current_time('mysql'),
             'message'        => 'تمام سرویس‌های هسته افزونه، دیتابیس و ارتباط ایجکس با موفقیت تایید شدند.'
         ));
+    }
+
+    public function optimize_curl_handle($handle, $parsed_args, $url) {
+        if (strpos($url, 'openrouter.ai') !== false || strpos($url, 'googleapis.com') !== false || strpos($url, 'openai.com') !== false) {
+            curl_setopt($handle, CURLOPT_IPRESOLVE, CURL_IPRESOLVE_V4);
+            curl_setopt($handle, CURLOPT_TCP_KEEPALIVE, 1);
+            curl_setopt($handle, CURLOPT_TCP_KEEPIDLE, 20);
+            curl_setopt($handle, CURLOPT_TCP_KEEPINTVL, 10);
+            curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, 0);
+        }
     }
 }
 
