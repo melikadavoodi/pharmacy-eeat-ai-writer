@@ -260,6 +260,7 @@ jQuery(document).ready(function ($) {
             url: pharmacyAiData.ajax_url,
             type: 'POST',
             data: formData,
+            timeout: 180000,
             success: function (res) {
                 $btn.prop('disabled', false);
                 $spinner.removeClass('is-active');
@@ -272,10 +273,24 @@ jQuery(document).ready(function ($) {
                     alert('خطا در تولید محتوا: ' + (res.data ? res.data : 'پاسخ نامعتبر دریافت شد.'));
                 }
             },
-            error: function () {
+            error: function (xhr, status, error) {
                 $btn.prop('disabled', false);
                 $spinner.removeClass('is-active');
-                alert('خطا در برقراری ارتباط با سرور.');
+
+                var statusText = xhr.status ? ('کد وضعیت ' + xhr.status + ': ' + (xhr.statusText || error)) : (status === 'timeout' ? 'پایان زمان مجاز (Timeout)' : 'قطع ارتباط شبکه');
+                var customMsg = 'خطا در ارتباط با سرور سایت (' + statusText + ')';
+
+                if (xhr.status === 413) {
+                    customMsg += '\nعلت: حجم تصویر یا داده‌های ارسالی برای هاست زیاد است. (در نسخه جدید این مورد با فشرده‌سازی خودکار حل شده است)';
+                } else if (xhr.status === 504 || xhr.status === 502 || status === 'timeout') {
+                    customMsg += '\nعلت: زمان پاسخ‌دهی سرور هوش مصنوعی طولانی‌تر از تایم‌اوت هاست شد. پیشنهاد می‌شود حجم محتوا را روی "مختصر" قرار دهید یا دوباره تلاش کنید.';
+                } else if (xhr.status === 403) {
+                    customMsg += '\nعلت: توکن امنیتی نشست وردپرس (Nonce) منقضی شده است. لطفاً یک بار صفحه را رفرش (F5) کنید.';
+                } else if (xhr.status === 500) {
+                    customMsg += '\nعلت: خطای داخلی سرور ۵۰۰ (احتمالاً برخورد به سقف زمان اجرای PHP یا تداخل هاست با درخواست خارجی).';
+                }
+
+                alert(customMsg);
             }
         });
     });
@@ -783,32 +798,63 @@ jQuery(document).ready(function ($) {
         });
     });
 
-    // Multimodal Product Image Upload & Vision (v3.7.0)
+    // Multimodal Product Image Upload & Vision with Canvas Compression (v3.9.1)
     $('#btn-upload-product-image').on('click', function () {
         $('#pharmacy_product_image_input').click();
     });
+
+    function compressAndStoreImage(file) {
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var img = new Image();
+            img.onload = function () {
+                var maxDimension = 1200;
+                var width = img.width;
+                var height = img.height;
+
+                if (width > maxDimension || height > maxDimension) {
+                    if (width > height) {
+                        height = Math.round((height * maxDimension) / width);
+                        width = maxDimension;
+                    } else {
+                        width = Math.round((width * maxDimension) / height);
+                        height = maxDimension;
+                    }
+                }
+
+                var canvas = document.createElement('canvas');
+                canvas.width = width;
+                canvas.height = height;
+                var ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+
+                // High-quality JPEG, super lightweight (~100-250KB) - safe for any host POST limit
+                var compressedB64 = canvas.toDataURL('image/jpeg', 0.82);
+                var compressedKb = Math.round((compressedB64.length * 0.75) / 1024);
+
+                $('#pharmacy_product_image_b64').val(compressedB64);
+                $('#product_image_preview').attr('src', compressedB64);
+                $('#product_image_filename').text(file.name + ' (فشرده و بهینه‌سازی‌شده: ' + compressedKb + ' کیلوبایت)');
+                $('#product_image_preview_wrap').css('display', 'flex');
+                $('#btn-remove-product-image').show();
+                $('#btn-upload-product-image').html('<span class="dashicons dashicons-upload"></span> تغییر عکس محصول');
+            };
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    }
 
     $('#pharmacy_product_image_input').on('change', function () {
         var file = this.files && this.files[0];
         if (!file) return;
 
-        if (file.size > 8 * 1024 * 1024) {
-            alert('حجم تصویر نباید بیشتر از ۸ مگابایت باشد.');
+        if (file.size > 20 * 1024 * 1024) {
+            alert('حجم فایل تصویر بسیار زیاد است (حداکثر ۲۰ مگابایت).');
             $(this).val('');
             return;
         }
 
-        var reader = new FileReader();
-        reader.onload = function (e) {
-            var b64 = e.target.result;
-            $('#pharmacy_product_image_b64').val(b64);
-            $('#product_image_preview').attr('src', b64);
-            $('#product_image_filename').text(file.name + ' (' + Math.round(file.size / 1024) + ' KB)');
-            $('#product_image_preview_wrap').css('display', 'flex');
-            $('#btn-remove-product-image').show();
-            $('#btn-upload-product-image').html('<span class="dashicons dashicons-upload"></span> تغییر عکس محصول');
-        };
-        reader.readAsDataURL(file);
+        compressAndStoreImage(file);
     });
 
     $('#btn-remove-product-image').on('click', function () {
