@@ -3,7 +3,7 @@
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
  * Plugin URI: https://drdarabipharmacy.com
  * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با متدولوژی‌های GEO (هوش مصنوعی گوگل)، CRO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر، تمایز فراتر از محصول و مراجع کلیک‌خور PubMed/Mayo Clinic.
- * Version: 3.9.2
+ * Version: 4.0.0
  * Author: تیم سئو و هوش مصنوعی دارابی
  * Author URI: https://drdarabipharmacy.com
  * Text Domain: pharmacy-eeat-ai
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '3.9.2');
+define('PHARMACY_EEAT_VERSION', '4.0.0');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
@@ -211,6 +211,11 @@ class Pharmacy_EEAT_Plugin {
         $raw_temp = isset($_POST['temperature']) ? floatval($_POST['temperature']) : 0.7;
         $temperature = ($raw_temp >= 0.1 && $raw_temp <= 1.0) ? $raw_temp : 0.7;
 
+        $selected_model = sanitize_text_field($_POST['ai_model'] ?? '');
+        if ($selected_model === 'custom' && !empty($_POST['custom_model'])) {
+            $selected_model = sanitize_text_field($_POST['custom_model']);
+        }
+
         $params = array(
             'content_type'    => sanitize_text_field($_POST['content_type'] ?? 'blog_post'),
             'mode'            => sanitize_text_field($_POST['mode'] ?? 'topic'),
@@ -228,6 +233,7 @@ class Pharmacy_EEAT_Plugin {
             'product_image_b64'    => isset($_POST['product_image_b64']) ? $_POST['product_image_b64'] : '',
             'target_audience'      => sanitize_text_field($_POST['target_audience'] ?? 'general'),
             'temperature'          => $temperature,
+            'model'                => $selected_model,
         );
 
         $result = Pharmacy_EEAT_AI_Service::generate_content($params);
