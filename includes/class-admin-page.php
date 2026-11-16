@@ -11,7 +11,7 @@ class Pharmacy_EEAT_Admin_Page {
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.9.2)</h1>
+                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v4.0.0)</h1>
                     <p class="pharmacy-ai-sub" style="margin-top: 0;">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، اعتبارسنجی بالینی چندوجهی (متن و عکس محصول)، تصویر برند کاتلر و آزمون خودکار سلامت</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
@@ -313,6 +313,33 @@ class Pharmacy_EEAT_Admin_Page {
                                         </div>
                                         <input type="range" id="pharmacy_temperature" name="temperature" min="0.1" max="1.0" step="0.05" value="0.70" style="width: 100%; margin: 6px 0 2px 0; cursor: pointer;">
                                         <small id="temp_desc_text" style="color: #0369a1; display: block; font-size: 11px; line-height: 1.3;">✨ طبیعی‌ترین لحن انسانی و بدون کلیشه (توصیه شده)</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- AI Engine & Model Comparative Selector (v4.0.0) -->
+                            <div class="pharmacy-row" style="background: #faf5ff; padding: 12px 14px; border-radius: 8px; border: 1px solid #e9d5ff; margin-bottom: 16px;">
+                                <div class="pharmacy-col" style="flex: 1 1 100%;">
+                                    <div class="pharmacy-field" style="margin-bottom: 0;">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; flex-wrap: wrap; gap: 6px;">
+                                            <label for="pharmacy_ai_model_selector" style="color: #6b21a8; font-weight: bold; font-size: 13.5px; margin-bottom: 0;">
+                                                <span class="dashicons dashicons-admin-generic" style="vertical-align: middle; color: #9333ea;"></span> انتخاب مدل هوش مصنوعی (جهت تست و مقایسه کیفیت نگارش):
+                                            </label>
+                                            <small style="color: #7e22ce;">می‌توانید مدل‌های مختلف (جمینای پرو، کلود، جی‌پی‌تی ۴) را تست و با هم مقایسه کنید</small>
+                                        </div>
+                                        <select id="pharmacy_ai_model_selector" name="ai_model" style="width: 100%; font-weight: 500;">
+                                            <option value="google/gemini-2.5-flash" selected>⚡ گوگل جمینای ۲.۵ فلش (سریع، بسیار دقیق و مقرون‌به‌صرفه - پیش‌فرض)</option>
+                                            <option value="google/gemini-1.5-pro">🧠 گوگل جمینای ۱.۵ پرو (استدلال بالینی عمیق، تحلیل چندمنبعی و نگارش غنی)</option>
+                                            <option value="anthropic/claude-3.5-sonnet">🖋️ آنتروپیک کلود ۳.۵ سونات (برترین قلم ادبی، فاخرترین واژگان فارسی و فوق‌العاده شبیه انسان)</option>
+                                            <option value="openai/gpt-4o">🌐 اوپن‌ای‌آی GPT-4o (جامع، رسمی و ساختاریافته)</option>
+                                            <option value="deepseek/deepseek-chat">💡 دیپ‌سیک V3 (مقرون‌به‌صرفه، تحلیلی و پرسرعت)</option>
+                                            <option value="google/gemini-2.0-flash-exp:free">🎁 جمینای ۲ اکسپریمنتال (کاملاً رایگان در اوپن‌روتر - ۰ اعتبار)</option>
+                                            <option value="meta-llama/llama-3.3-70b-instruct:free">🎁 متا لاما ۳.۳ هفتاد میلیاردی (کاملاً رایگان در اوپن‌روتر - ۰ اعتبار)</option>
+                                            <option value="custom">⚙️ مدل سفارشی دلخواه (تایپ دستی نام مدل)...</option>
+                                        </select>
+                                        <div id="custom_model_input_wrap" style="display: none; margin-top: 8px;">
+                                            <input type="text" id="pharmacy_custom_model" name="custom_model" placeholder="نام دقیق مدل مثلاً: google/gemini-pro یا qwen/qwen-2.5-72b-instruct" class="regular-text" style="width: 100%;" dir="ltr">
+                                        </div>
                                     </div>
                                 </div>
                             </div>
