@@ -1,4 +1,4 @@
-/* Pharmacy EEAT AI Writer Pro JS - Version 3.0.0 */
+/* Pharmacy EEAT AI Writer Pro JS - Version 3.5.0 */
 jQuery(document).ready(function ($) {
 
     // Multi-Tone Brand Pill Toggle (v3.4.0)
@@ -11,11 +11,12 @@ jQuery(document).ready(function ($) {
         }
     });
 
-    // Content Type Selector Pills
-    $('.type-pill input[type="radio"]').on('change', function () {
+    // Content Type Selector Pills (v3.5.0 Rock-Solid Click Handler)
+    $(document).on('click', '.type-pill', function (e) {
+        e.preventDefault();
         $('.type-pill').removeClass('active');
-        $(this).closest('.type-pill').addClass('active');
-        var val = $(this).val();
+        $(this).addClass('active');
+        var val = $(this).data('type') || $(this).find('input[type="radio"]').val() || 'blog_post';
         $('#pharmacy_content_type').val(val);
 
         if (val === 'product') {
@@ -23,21 +24,21 @@ jQuery(document).ready(function ($) {
             $('#pharmacy_tone').val('commercial_buyer');
             $('#pharmacy_seo_strategy').val('cro_conversion');
             $('#pharmacy_topic').attr('placeholder', 'مثال: کپسول کلاژن پلاس ال لیزین یوروویتال (۶۰ عددی)');
-            $('#existing_product_row').slideDown(250);
+            $('#existing_product_row').stop(true, true).slideDown(250);
             $('#res_features_box').show();
         } else if (val === 'category') {
             $('#pharmacy_words').val('800');
             $('#pharmacy_tone').val('commercial_buyer');
             $('#pharmacy_seo_strategy').val('geo_ai_search');
             $('#pharmacy_topic').attr('placeholder', 'مثال: مکمل‌های تقویت پوست، مو و ناخن');
-            $('#existing_product_row').slideUp(250);
+            $('#existing_product_row').stop(true, true).slideUp(250);
             $('#res_features_box').hide();
         } else {
             $('#pharmacy_words').val('1500');
             $('#pharmacy_tone').val('medical_consultant');
             $('#pharmacy_seo_strategy').val('geo_ai_search');
             $('#pharmacy_topic').attr('placeholder', 'مثال: کپسول گاباپنتین؛ موارد مصرف، دوز و عوارض جانبی');
-            $('#existing_product_row').slideUp(250);
+            $('#existing_product_row').stop(true, true).slideUp(250);
             $('#res_features_box').hide();
         }
     });
@@ -154,6 +155,21 @@ jQuery(document).ready(function ($) {
         $('#res_post_excerpt').val(d.excerpt || '');
         $('#res_post_content').val(d.content || '');
         $('#res_content_preview').html(d.content || '');
+
+        // Render Kotler Brand Image & Value-Add (v3.5.0)
+        if (d.brand_message) {
+            $('#res_brand_message_text').text(d.brand_message);
+            $('.pharmacy-brand-differentiator-box').show();
+        } else {
+            $('#res_brand_message_text').text('داروخانه آنلاین دکتر دارابی؛ اصالت دارویی، مشاوره بالینی امین و سلامت پایدار.');
+        }
+
+        if (d.beyond_product_value) {
+            $('#res_beyond_product_text').html(d.beyond_product_value);
+            $('.pharmacy-brand-differentiator-box').show();
+        } else {
+            $('#res_beyond_product_text').html('راهنمای بالینی و رژیم مکمل در متن اصلی گنجانده شده است.');
+        }
 
         // Render Scorecard
         if (d.scorecard) {
@@ -370,6 +386,8 @@ jQuery(document).ready(function ($) {
                 rank_math_title: rmTitle,
                 rank_math_desc: rmDesc,
                 rank_math_keyword: rmKeyword,
+                brand_message: currentGenerationData.brand_message || '',
+                beyond_product_value: currentGenerationData.beyond_product_value || '',
                 schema_json: schemaJson,
                 internal_links: internalLinks,
                 scorecard: scorecard
