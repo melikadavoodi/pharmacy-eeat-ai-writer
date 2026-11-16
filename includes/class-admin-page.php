@@ -11,7 +11,7 @@ class Pharmacy_EEAT_Admin_Page {
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.7.0)</h1>
+                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.7.1)</h1>
                     <p class="pharmacy-ai-sub" style="margin-top: 0;">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، اعتبارسنجی بالینی چندوجهی (متن و عکس محصول)، تصویر برند کاتلر و آزمون خودکار سلامت</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
@@ -73,11 +73,16 @@ class Pharmacy_EEAT_Admin_Page {
                             </button>
                         </div>
 
-                        <!-- Source Modes Tabs -->
-                        <div class="pharmacy-tabs">
-                            <button type="button" class="pharmacy-tab active" data-tab="tab-topic">تالیف و پژوهش علمی</button>
-                            <button type="button" class="pharmacy-tab" data-tab="tab-multi-url">چند منبعی (چندین لینک خارجی)</button>
-                            <button type="button" class="pharmacy-tab" data-tab="tab-text">ترجمه و بومی‌سازی متن خام</button>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                            <!-- Source Modes Tabs -->
+                            <div class="pharmacy-tabs" style="margin-bottom: 0;">
+                                <button type="button" class="pharmacy-tab active" data-tab="tab-topic">تالیف و پژوهش علمی</button>
+                                <button type="button" class="pharmacy-tab" data-tab="tab-multi-url">چند منبعی (چندین لینک خارجی)</button>
+                                <button type="button" class="pharmacy-tab" data-tab="tab-text">ترجمه و بومی‌سازی متن خام</button>
+                            </div>
+                            <button type="button" class="button button-secondary" id="btn-reset-form-top" style="display: inline-flex; align-items: center; gap: 4px; color: #b91c1c; border-color: #fca5a5; font-size: 12px; height: 32px;">
+                                <span class="dashicons dashicons-trash" style="font-size: 16px; width: 16px; height: 16px; vertical-align: middle;"></span> پاکسازی فرم / شروع محصول جدید
+                            </button>
                         </div>
 
                         <form id="pharmacy-ai-generate-form">
@@ -324,6 +329,9 @@ class Pharmacy_EEAT_Admin_Page {
                                 </button>
                                 <button type="button" class="button button-primary" id="pharmacy-save-draft-btn">
                                     <span class="dashicons dashicons-saved"></span> ذخیره / به‌روزرسانی مستقیم در سایت
+                                </button>
+                                <button type="button" class="button button-secondary" id="btn-start-new-product" style="display: inline-flex; align-items: center; gap: 4px; color: #166534; border-color: #86efac; background: #f0fdf4;">
+                                    <span class="dashicons dashicons-plus-alt"></span> ثبت محصول بعدی (پاکسازی فرم)
                                 </button>
                             </div>
                         </div>
