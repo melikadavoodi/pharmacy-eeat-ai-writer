@@ -60,11 +60,15 @@ class Pharmacy_EEAT_AI_Service {
         $system_instruction = self::build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $reviewer_name, $reviewer_code, $disclaimer_txt);
         $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $fetched_sources_text, $clean_urls);
 
-        $max_tokens = 3800;
-        if ($word_count <= 800) {
-            $max_tokens = 2500;
-        } elseif ($word_count >= 2000) {
-            $max_tokens = 4500;
+        $max_tokens = 4200;
+        if ($word_count <= 600) {
+            $max_tokens = 3200;
+        } elseif ($word_count <= 1000) {
+            $max_tokens = 4200;
+        } elseif ($word_count <= 1600) {
+            $max_tokens = 5000;
+        } else {
+            $max_tokens = 6000;
         }
 
         if ($api_provider === 'openrouter') {
