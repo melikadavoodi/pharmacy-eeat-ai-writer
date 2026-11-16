@@ -11,8 +11,8 @@ class Pharmacy_EEAT_Admin_Page {
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.6.0)</h1>
-                    <p class="pharmacy-ai-sub" style="margin-top: 0;">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر و ماژول خودکار سلامت پلتفرم</p>
+                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.7.0)</h1>
+                    <p class="pharmacy-ai-sub" style="margin-top: 0;">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، اعتبارسنجی بالینی چندوجهی (متن و عکس محصول)، تصویر برند کاتلر و آزمون خودکار سلامت</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
                     <button type="button" class="button button-secondary" id="btn-run-diagnostics" style="display: inline-flex; align-items: center; gap: 6px; padding: 6px 14px; height: auto; font-weight: bold; border-color: #0284c7; color: #0284c7;">
@@ -124,6 +124,45 @@ class Pharmacy_EEAT_Admin_Page {
                                 <div class="pharmacy-field">
                                     <label for="pharmacy_source_text">متن منبع انگلیسی یا نکات بروشور دارو:</label>
                                     <textarea id="pharmacy_source_text" name="source_text" rows="5" class="large-text" placeholder="متن مقالات یا مشخصات بروشور را اینجا قرار دهید..."></textarea>
+                                </div>
+                            </div>
+
+                            <!-- Clinical Ground Truth & Multimodal Vision Box (v3.7.0) -->
+                            <div class="pharmacy-ground-truth-box" style="background: #f0fdf4; border: 1px solid #bbf7d0; border-right: 5px solid #16a34a; border-radius: 8px; padding: 14px 18px; margin-bottom: 18px;">
+                                <h3 style="margin-top: 0; color: #166534; font-size: 14.5px; display: flex; align-items: center; gap: 6px;">
+                                    <span class="dashicons dashicons-forms" style="color: #16a34a;"></span> مشخصات بالینی واقعی و قطعی محصول (منع مطلق خطای دوز و ترکیبات)
+                                </h3>
+                                <p style="color: #15803d; font-size: 12.5px; margin: 2px 0 10px 0;">
+                                    برای اینکه هوش مصنوعی دوز، ترکیبات یا شکل دارو (ویال خوراکی، کپسول، ساشه) را اشتباه ننویسد، می‌توانید مشخصات را بنویسید یا <strong>عکس بروشور / جعبه محصول</strong> را بارگذاری کنید تا مو به مو طبق آن بنویسد:
+                                </p>
+
+                                <div class="pharmacy-field" style="margin-bottom: 12px;">
+                                    <label for="pharmacy_ground_truth" style="font-weight: 600; color: #14532d; font-size: 13px;">
+                                        <span class="dashicons dashicons-edit"></span> دوز دقیق، ترکیبات و نحوه مصرف (متن):
+                                    </label>
+                                    <textarea id="pharmacy_ground_truth" name="ground_truth" rows="3" class="large-text" placeholder="مثال: ویال خوراکی ۲۵ میلی‌لیتری؛ هر ویال حاوی ۵۰۰۰ میلی‌گرم کلاژن هیدرولیزشده، ۸۰ میلی‌گرم ویتامین C، بیوتین و زینک. بسته ۱۴ عددی. طعم پرتقال. مصرف روزانه ۱ ویال ترجیحاً صبح‌ها."></textarea>
+                                </div>
+
+                                <div class="pharmacy-field" style="margin-bottom: 0;">
+                                    <label style="font-weight: 600; color: #14532d; font-size: 13px; display: block; margin-bottom: 6px;">
+                                        <span class="dashicons dashicons-camera"></span> بارگذاری تصویر جعبه محصول، بروشور یا جدول ترکیبات (عکس):
+                                    </label>
+                                    <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                                        <input type="file" id="pharmacy_product_image_input" accept="image/*" style="display: none;">
+                                        <button type="button" class="button button-secondary" id="btn-upload-product-image" style="display: inline-flex; align-items: center; gap: 6px;">
+                                            <span class="dashicons dashicons-upload"></span> انتخاب و بارگذاری عکس محصول (JPG / PNG)
+                                        </button>
+                                        <button type="button" class="button button-link-delete" id="btn-remove-product-image" style="display: none; color: #dc2626;">حذف عکس</button>
+                                    </div>
+                                    
+                                    <div id="product_image_preview_wrap" style="display: none; margin-top: 10px; align-items: center; gap: 12px; background: #fff; padding: 10px; border-radius: 6px; border: 1px dashed #16a34a;">
+                                        <img id="product_image_preview" src="" alt="پیش‌نمایش تصویر محصول" style="max-height: 80px; border-radius: 4px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+                                        <div>
+                                            <strong id="product_image_filename" style="color: #166534; font-size: 12.5px;"></strong>
+                                            <div style="color: #475569; font-size: 11.5px; margin-top: 2px;">هوش مصنوعی چندوجهی جدول ترکیبات و دوزها را مستقیماً از روی این تصویر اسکن و تایید می‌کند.</div>
+                                        </div>
+                                    </div>
+                                    <input type="hidden" name="product_image_b64" id="pharmacy_product_image_b64" value="">
                                 </div>
                             </div>
 
