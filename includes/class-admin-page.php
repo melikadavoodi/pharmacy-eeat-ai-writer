@@ -11,7 +11,7 @@ class Pharmacy_EEAT_Admin_Page {
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
                 <div>
-                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.8.0)</h1>
+                    <h1 style="margin-bottom: 5px;">استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.9.0)</h1>
                     <p class="pharmacy-ai-sub" style="margin-top: 0;">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، اعتبارسنجی بالینی چندوجهی (متن و عکس محصول)، تصویر برند کاتلر و آزمون خودکار سلامت</p>
                 </div>
                 <div style="display: flex; gap: 10px; align-items: center;">
@@ -276,15 +276,15 @@ class Pharmacy_EEAT_Admin_Page {
                                 </div>
                             </div>
 
-                            <!-- Additional Options: Keyword, Words, Audience -->
+                            <!-- Additional Options: Keyword, Words, Audience, Temperature -->
                             <div class="pharmacy-row">
-                                <div class="pharmacy-col" style="flex: 1 1 40%;">
+                                <div class="pharmacy-col" style="flex: 1 1 30%;">
                                     <div class="pharmacy-field">
                                         <label for="pharmacy_keyword">کلمه کلیدی رنک‌مث (Focus Keyword):</label>
                                         <input type="text" id="pharmacy_keyword" name="focus_keyword" placeholder="مثال: کلاژن پلاس ال لیزین یوروویتال" class="regular-text" style="width: 100%;">
                                     </div>
                                 </div>
-                                <div class="pharmacy-col" style="flex: 1 1 30%;">
+                                <div class="pharmacy-col" style="flex: 1 1 22%;">
                                     <div class="pharmacy-field">
                                         <label for="pharmacy_words">حجم محتوا:</label>
                                         <select id="pharmacy_words" name="word_count" style="width: 100%;">
@@ -294,13 +294,25 @@ class Pharmacy_EEAT_Admin_Page {
                                         </select>
                                     </div>
                                 </div>
-                                <div class="pharmacy-col" style="flex: 1 1 30%;">
+                                <div class="pharmacy-col" style="flex: 1 1 22%;">
                                     <div class="pharmacy-field">
                                         <label for="pharmacy_audience">مخاطب هدف:</label>
                                         <select id="pharmacy_audience" name="target_audience" style="width: 100%;">
                                             <option value="general" selected>عموم مصرف‌کنندگان و بیماران</option>
                                             <option value="specialist">پزشکان، داروسازان و کادر درمان</option>
                                         </select>
+                                    </div>
+                                </div>
+                                <div class="pharmacy-col" style="flex: 1 1 26%;">
+                                    <div class="pharmacy-field">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2px;">
+                                            <label for="pharmacy_temperature" style="margin-bottom: 0; font-weight: bold; color: #0f172a;">
+                                                <span class="dashicons dashicons-art" style="vertical-align: middle; color: #0284c7;"></span> دمای خلاقیت نگارش:
+                                            </label>
+                                            <span id="temp_value_badge" style="background: #0284c7; color: #fff; font-weight: bold; padding: 1px 7px; border-radius: 4px; font-size: 11.5px; font-family: monospace;">0.70</span>
+                                        </div>
+                                        <input type="range" id="pharmacy_temperature" name="temperature" min="0.1" max="1.0" step="0.05" value="0.70" style="width: 100%; margin: 6px 0 2px 0; cursor: pointer;">
+                                        <small id="temp_desc_text" style="color: #0369a1; display: block; font-size: 11px; line-height: 1.3;">✨ طبیعی‌ترین لحن انسانی و بدون کلیشه (توصیه شده)</small>
                                     </div>
                                 </div>
                             </div>
