@@ -863,6 +863,27 @@ jQuery(document).ready(function ($) {
         } catch (e) {}
     })();
 
+    // Temperature Slider Live Feedback (v3.9.0)
+    $('#pharmacy_temperature').on('input change', function () {
+        var val = parseFloat($(this).val()).toFixed(2);
+        $('#temp_value_badge').text(val);
+        var desc = '';
+        if (val <= 0.35) {
+            desc = '🎯 بسیار دقیق، متمرکز و آکادمیک (حداقل تغییرات و فرمول‌محور)';
+            $('#temp_value_badge').css('background', '#0369a1');
+        } else if (val <= 0.55) {
+            desc = '⚖️ متعادل، استاندارد و متکی بر مراجع بالینی';
+            $('#temp_value_badge').css('background', '#0891b2');
+        } else if (val <= 0.80) {
+            desc = '✨ طبیعی‌ترین لحن انسانی و بدون کلیشه (توصیه شده)';
+            $('#temp_value_badge').css('background', '#16a34a');
+        } else {
+            desc = '🎨 حداکثر خلاقیت ادبی، داستان‌محور و استعاری';
+            $('#temp_value_badge').css('background', '#9333ea');
+        }
+        $('#temp_desc_text').text(desc);
+    });
+
     // Start New Product / Reset Form
     function resetFormForNewProduct() {
         if (!confirm('آیا مایلید فرم برای شروع محصول جدید پاکسازی شود؟\n(در صورتی که محتوای تولیدشده را ذخیره نکرده‌اید، ابتدا روی دکمه ذخیره مستقیم کلیک کنید)')) {
