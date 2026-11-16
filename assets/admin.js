@@ -930,6 +930,16 @@ jQuery(document).ready(function ($) {
         $('#temp_desc_text').text(desc);
     });
 
+    // Model Selector Custom Input Toggle (v4.0.0)
+    $('#pharmacy_ai_model_selector').on('change', function () {
+        if ($(this).val() === 'custom') {
+            $('#custom_model_input_wrap').slideDown(200);
+            $('#pharmacy_custom_model').focus();
+        } else {
+            $('#custom_model_input_wrap').slideUp(200);
+        }
+    });
+
     // Start New Product / Reset Form
     function resetFormForNewProduct() {
         if (!confirm('آیا مایلید فرم برای شروع محصول جدید پاکسازی شود؟\n(در صورتی که محتوای تولیدشده را ذخیره نکرده‌اید، ابتدا روی دکمه ذخیره مستقیم کلیک کنید)')) {
@@ -953,6 +963,10 @@ jQuery(document).ready(function ($) {
         $('#product_image_preview_wrap').hide();
         $('#btn-remove-product-image').hide();
         $('#btn-upload-product-image').html('<span class="dashicons dashicons-upload"></span> انتخاب و بارگذاری عکس محصول (JPG / PNG)');
+
+        // Clear model selector
+        $('#pharmacy_ai_model_selector').val('google/gemini-2.5-flash').trigger('change');
+        $('#pharmacy_custom_model').val('');
 
         // Clear saved input draft
         try {
