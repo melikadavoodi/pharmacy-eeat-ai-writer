@@ -783,6 +783,86 @@ jQuery(document).ready(function ($) {
         });
     });
 
+    // Multimodal Product Image Upload & Vision (v3.7.0)
+    $('#btn-upload-product-image').on('click', function () {
+        $('#pharmacy_product_image_input').click();
+    });
+
+    $('#pharmacy_product_image_input').on('change', function () {
+        var file = this.files && this.files[0];
+        if (!file) return;
+
+        if (file.size > 8 * 1024 * 1024) {
+            alert('حجم تصویر نباید بیشتر از ۸ مگابایت باشد.');
+            $(this).val('');
+            return;
+        }
+
+        var reader = new FileReader();
+        reader.onload = function (e) {
+            var b64 = e.target.result;
+            $('#pharmacy_product_image_b64').val(b64);
+            $('#product_image_preview').attr('src', b64);
+            $('#product_image_filename').text(file.name + ' (' + Math.round(file.size / 1024) + ' KB)');
+            $('#product_image_preview_wrap').css('display', 'flex');
+            $('#btn-remove-product-image').show();
+            $('#btn-upload-product-image').html('<span class="dashicons dashicons-upload"></span> تغییر عکس محصول');
+        };
+        reader.readAsDataURL(file);
+    });
+
+    $('#btn-remove-product-image').on('click', function () {
+        $('#pharmacy_product_image_input').val('');
+        $('#pharmacy_product_image_b64').val('');
+        $('#product_image_preview').attr('src', '');
+        $('#product_image_preview_wrap').hide();
+        $(this).hide();
+        $('#btn-upload-product-image').html('<span class="dashicons dashicons-upload"></span> انتخاب و بارگذاری عکس محصول (JPG / PNG)');
+    });
+
+    // Auto-Save User Input Drafts (Prevent data loss on network drops or refresh)
+    var inputDraftTimeout = null;
+    function saveInputDraft() {
+        try {
+            var draft = {
+                topic: $('#pharmacy_topic').val() || '',
+                ground_truth: $('#pharmacy_ground_truth').val() || '',
+                keyword: $('#pharmacy_keyword').val() || '',
+                source_text: $('#pharmacy_source_text').val() || ''
+            };
+            localStorage.setItem('pharmacy_ai_input_draft', JSON.stringify(draft));
+        } catch (e) {}
+    }
+
+    $('#pharmacy_topic, #pharmacy_ground_truth, #pharmacy_keyword, #pharmacy_source_text').on('input change', function () {
+        clearTimeout(inputDraftTimeout);
+        inputDraftTimeout = setTimeout(saveInputDraft, 500);
+    });
+
+    // Restore draft inputs on load if available and fields are empty
+    (function restoreInputDraft() {
+        try {
+            var raw = localStorage.getItem('pharmacy_ai_input_draft');
+            if (raw) {
+                var draft = JSON.parse(raw);
+                if (draft) {
+                    if (!$('#pharmacy_topic').val() && draft.topic) {
+                        $('#pharmacy_topic').val(draft.topic);
+                    }
+                    if (!$('#pharmacy_ground_truth').val() && draft.ground_truth) {
+                        $('#pharmacy_ground_truth').val(draft.ground_truth);
+                    }
+                    if (!$('#pharmacy_keyword').val() && draft.keyword) {
+                        $('#pharmacy_keyword').val(draft.keyword);
+                    }
+                    if (!$('#pharmacy_source_text').val() && draft.source_text) {
+                        $('#pharmacy_source_text').val(draft.source_text);
+                    }
+                }
+            }
+        } catch (e) {}
+    })();
+
     $('#btn-close-diagnostics').on('click', function () {
         $('#pharmacy-diagnostics-box').slideUp(250);
     });
