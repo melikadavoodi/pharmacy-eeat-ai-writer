@@ -10,8 +10,8 @@ class Pharmacy_EEAT_Admin_Page {
         ?>
         <div class="wrap pharmacy-ai-wrap" dir="rtl">
             <div class="pharmacy-ai-header">
-                <h1>استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.0)</h1>
-                <p class="pharmacy-ai-sub">مجهز به متدولوژی‌های GEO (دیده‌شدن در هوش مصنوعی گوگل)، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ساختار اسکیما و لینک‌سازی تاپیک کلاستر</p>
+                <h1>استودیوی فوق‌پیشرفته محتوا، سئو و هوش مصنوعی داروخانه (Content AI Pro v3.5.0)</h1>
+                <p class="pharmacy-ai-sub">مجهز به متدولوژی‌های GEO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر و تمایز بالینی غیرقابل تقلید</p>
             </div>
 
             <?php if (empty($api_key)) : ?>
@@ -41,20 +41,17 @@ class Pharmacy_EEAT_Admin_Page {
                 <!-- Left Column: Content Generator -->
                 <div class="pharmacy-main-col">
                     <div class="pharmacy-ai-card">
-                        <!-- Content Type Selector Pills -->
+                        <!-- Content Type Selector Pills (v3.5.0 Rock-Solid Clickable Buttons) -->
                         <div class="pharmacy-type-selector">
-                            <label class="type-pill active">
-                                <input type="radio" name="content_type_choice" value="blog_post" checked>
+                            <button type="button" class="type-pill active" data-type="blog_post">
                                 <span class="dashicons dashicons-welcome-write-blog"></span> مقاله وبلاگ پزشکی
-                            </label>
-                            <label class="type-pill">
-                                <input type="radio" name="content_type_choice" value="product">
+                            </button>
+                            <button type="button" class="type-pill" data-type="product">
                                 <span class="dashicons dashicons-cart"></span> صفحه محصول دارویی/مکمل (ووکامرس)
-                            </label>
-                            <label class="type-pill">
-                                <input type="radio" name="content_type_choice" value="category">
+                            </button>
+                            <button type="button" class="type-pill" data-type="category">
                                 <span class="dashicons dashicons-category"></span> توضیحات دسته‌بندی فروشگاه
-                            </label>
+                            </button>
                         </div>
 
                         <!-- Source Modes Tabs -->
@@ -198,6 +195,22 @@ class Pharmacy_EEAT_Admin_Page {
                                         </select>
                                     </div>
                                 </div>
+                                <div class="pharmacy-col" style="flex: 1 1 100%; margin-top: 10px;">
+                                    <div class="pharmacy-field" style="margin-bottom: 0; background: #fff; padding: 12px 14px; border-radius: 8px; border: 1px solid #f3e8ff;">
+                                        <label for="pharmacy_brand_image_strategy" style="color: #6b21a8; font-weight: bold; font-size: 13.5px;">
+                                            <span class="dashicons dashicons-awards" style="vertical-align: middle;"></span> استراتژی تصویر برند فیلیپ کاتلر و تمایز رقابتی (Brand Image & Value-Add):
+                                        </label>
+                                        <select id="pharmacy_brand_image_strategy" name="brand_image_strategy" style="width: 100%; font-weight: 500; margin-top: 6px;">
+                                            <option value="beyond_product_holistic" selected>🌟 فراتر از محصول و ارزش جامع (ارائه پروتکل ۳۶۰ درجه سبک زندگی، رژیم مکمل و تمایز بالینی غیرقابل تقلید)</option>
+                                            <option value="functional_safety">🛡️ تصویر عملکردی و اصالت بالینی (تاکید بر جذب حداکثری، فرمولاسیون دارویی، عدم سمیت و اصالت ۱۰۰٪ با کد رهگیری)</option>
+                                            <option value="emotional_wellbeing">❤️ تصویر احساسی و آرامش‌بخش (تبدیل اضطراب بیماری یا کهولت به حس امنیت، امید واقعی، کرامت و مراقبت دلسوزانه)</option>
+                                            <option value="personal_smart_choice">💎 تصویر هویت شخصی و انتخاب آگاهانه (ارتقای هویت خریدار به عنوان فردی هوشمند و متعهد به سلامت اصیل)</option>
+                                            <option value="user_lifestyle_story">🏃 تصویر سناریوی کاربر واقعی (انطباق مستقیم با نیازهای روزمره شاغلان، مادران، ورزشکاران یا میانسالان)</option>
+                                            <option value="social_prestige">✨ تصویر اجتماعی و جایگاه فاخر (پرستیژ انتخاب برند استاندارد اصیل جهانی و نماد سرآمدی در سلامت فردی)</option>
+                                        </select>
+                                        <small style="color: #7e22ce; margin-top: 4px; display: block;">چون محصولات شما در تمام داروخانه‌ها موجود است، این استراتژی محتوای شما را به تجربه‌ای فراتر از محصول و ماندگار در ذهن مخاطب تبدیل می‌کند.</small>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Additional Options: Keyword, Words, Audience -->
@@ -296,6 +309,24 @@ class Pharmacy_EEAT_Admin_Page {
                             </div>
                         </div>
 
+                        <!-- Brand Image & Beyond-Product Differentiator Box (v3.5.0) -->
+                        <div class="pharmacy-brand-differentiator-box" style="background: #fffbeb; border: 1px solid #fde68a; border-right: 5px solid #d97706; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h3 style="margin: 0; color: #92400e; font-size: 15px;">
+                                    <span class="dashicons dashicons-awards" style="vertical-align: middle;"></span> تمایز تصویر برند و ارزش فراتر از محصول (Brand Image & Value-Add):
+                                </h3>
+                                <button type="button" class="button button-small btn-quick-copy" data-target="#res_brand_message_text">کپی پیام برند</button>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <span style="color: #b45309; font-weight: bold; font-size: 12.5px;">پیام محوری و ماندگار برند در ذهن مخاطب:</span>
+                                <div id="res_brand_message_text" style="background: #fff; padding: 10px 14px; border-radius: 6px; border: 1px dashed #f59e0b; margin-top: 4px; font-weight: 600; color: #78350f;"></div>
+                            </div>
+                            <div>
+                                <span style="color: #b45309; font-weight: bold; font-size: 12.5px;">پروتکل هم‌افزایی و ارزش افزوده فراتر از دارو:</span>
+                                <div id="res_beyond_product_text" style="background: #fff; padding: 12px 14px; border-radius: 6px; border: 1px solid #fef3c7; margin-top: 4px; line-height: 1.7; color: #451a03; font-size: 13px;"></div>
+                            </div>
+                        </div>
+
                         <div class="pharmacy-field">
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <label>عنوان اصلی نوشته / محصول:</label>
@@ -313,6 +344,24 @@ class Pharmacy_EEAT_Admin_Page {
                                 <button type="button" class="button button-small btn-quick-copy" data-target="#res_short_description">کپی ویژگی‌ها (توضیحات کوتاه)</button>
                             </div>
                             <textarea id="res_short_description" rows="4" class="large-text" placeholder="فهرست ویژگی‌های شاخص، ترکیبات و فواید محصول..."></textarea>
+                        </div>
+
+                        <!-- Brand Image & Beyond-Product Differentiator Box (v3.5.0) -->
+                        <div class="pharmacy-brand-differentiator-box" style="background: #fffbeb; border: 1px solid #fde68a; border-right: 5px solid #d97706; border-radius: 8px; padding: 14px 18px; margin-bottom: 20px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                <h3 style="margin: 0; color: #92400e; font-size: 15px;">
+                                    <span class="dashicons dashicons-awards" style="vertical-align: middle;"></span> تمایز تصویر برند و ارزش فراتر از محصول (Brand Image & Value-Add):
+                                </h3>
+                                <button type="button" class="button button-small btn-quick-copy" data-target="#res_brand_message_text">کپی پیام برند</button>
+                            </div>
+                            <div style="margin-bottom: 10px;">
+                                <span style="color: #b45309; font-weight: bold; font-size: 12.5px;">پیام محوری و ماندگار برند در ذهن مخاطب:</span>
+                                <div id="res_brand_message_text" style="background: #fff; padding: 10px 14px; border-radius: 6px; border: 1px dashed #f59e0b; margin-top: 4px; font-weight: 600; color: #78350f;"></div>
+                            </div>
+                            <div>
+                                <span style="color: #b45309; font-weight: bold; font-size: 12.5px;">پروتکل هم‌افزایی و ارزش افزوده فراتر از دارو:</span>
+                                <div id="res_beyond_product_text" style="background: #fff; padding: 12px 14px; border-radius: 6px; border: 1px solid #fef3c7; margin-top: 4px; line-height: 1.7; color: #451a03; font-size: 13px;"></div>
+                            </div>
                         </div>
 
                         <div class="pharmacy-field">
