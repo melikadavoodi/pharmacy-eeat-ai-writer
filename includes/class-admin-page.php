@@ -576,10 +576,10 @@ class Pharmacy_EEAT_Admin_Page {
                             </td>
                         </tr>
                         <tr id="row_api_proxy">
-                            <th scope="row"><label for="pharmacy_ai_api_proxy">آدرس ورکر کلادفلر (برای حالت جمینای):</label></th>
+                            <th scope="row"><label for="pharmacy_ai_api_proxy">آدرس پروکسی معکوس / ورکر کلادفلر (اختیاری):</label></th>
                             <td>
-                                <input type="url" name="pharmacy_ai_api_proxy" id="pharmacy_ai_api_proxy" value="<?php echo esc_attr($api_proxy); ?>" class="large-text" dir="ltr" placeholder="https://your-gemini-proxy.workers.dev">
-                                <p class="description">اگر حالت جمینای کلادفلر را انتخاب کرده‌اید، آدرس ورکر کلادفلر خود را اینجا قرار دهید تا تحریم گوگل روی هاست نت‌افراز دور زده شود.</p>
+                                <input type="url" name="pharmacy_ai_api_proxy" id="pharmacy_ai_api_proxy" value="<?php echo esc_attr($api_proxy); ?>" class="large-text" dir="ltr" placeholder="https://your-proxy.workers.dev">
+                                <p class="description">اختیاری: اگر اینترنت هاست نت‌افراز با اختلالات مقطعی (مانند خطای cURL 56 یا قطع ارتباط توسط شبکه) روبرو شود، می‌توانید آدرس ورکر کلادفلر خود را اینجا وارد کنید تا تمام درخواست‌های اوپن‌روتر یا جمینای بدون فیلترینگ و با نهایت سرعت عبور کنند.</p>
                             </td>
                         </tr>
                     </table>
