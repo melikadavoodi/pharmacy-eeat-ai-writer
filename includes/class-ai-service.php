@@ -27,6 +27,8 @@ class Pharmacy_EEAT_AI_Service {
         $reading_level        = isset($params['reading_level']) ? sanitize_text_field($params['reading_level']) : 'general';
         $seo_strategy         = isset($params['seo_strategy']) ? sanitize_text_field($params['seo_strategy']) : 'geo_ai_search';
         $brand_image_strategy = isset($params['brand_image_strategy']) ? sanitize_text_field($params['brand_image_strategy']) : 'beyond_product_holistic';
+        $ground_truth         = isset($params['ground_truth']) ? sanitize_textarea_field($params['ground_truth']) : '';
+        $product_image_b64    = isset($params['product_image_b64']) ? $params['product_image_b64'] : '';
         $target_audience      = isset($params['target_audience']) ? sanitize_text_field($params['target_audience']) : 'general';
 
         $reviewer_name  = get_option('pharmacy_ai_reviewer_name', 'دکتر داروساز');
@@ -51,13 +53,13 @@ class Pharmacy_EEAT_AI_Service {
             $fetched_sources_text = $source_text;
         }
 
-        $system_instruction = self::build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt);
-        $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $fetched_sources_text, $clean_urls);
+        $system_instruction = self::build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $reviewer_name, $reviewer_code, $disclaimer_txt);
+        $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $fetched_sources_text, $clean_urls);
 
         if ($api_provider === 'openrouter') {
-            return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base);
+            return self::call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base, $product_image_b64);
         } elseif ($api_provider === 'gemini') {
-            return self::call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base);
+            return self::call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base, $product_image_b64);
         } else {
             return self::call_openai($api_key, $model, $system_instruction, $user_prompt, $proxy_base);
         }
@@ -111,7 +113,7 @@ class Pharmacy_EEAT_AI_Service {
         return mb_substr(trim($clean), 0, 10000);
     }
 
-    private static function build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $reviewer_name, $reviewer_code, $disclaimer_txt) {
+    private static function build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $reviewer_name, $reviewer_code, $disclaimer_txt) {
         $tones_desc = array(
             'medical_consultant'   => 'مشاوره‌ای، دلسوزانه و امین داروخانه‌ای (همانند گفت‌وگوی صمیمانه، گرم و اطمینان‌بخش دکتر داروساز پشت پیشخوان با بیمار)',
             'clinical_evidence'    => 'بسیار علمی، بالینی، آکادمیک و متکی بر کارآزمایی‌های بالینی رسمی بدون مبالغه (Evidence-Based Medicine)',
@@ -229,7 +231,22 @@ class Pharmacy_EEAT_AI_Service {
 شامل مقدمه گیرا، کاربردها و فواید درمانی، نحوه عملکرد در بدن، دوز و نحوه مصرف، عوارض جانبی تفکیک‌شده (شایع/نادر)، تداخلات با داروها و غذاها، احتیاط‌های ویژه، پرسش‌های متداول (FAQ) و نتیجه‌گیری.";
         }
 
+        // Clinical Ground Truth & Zero-Hallucination Directive (v3.7.0)
+        $ground_truth_rule = '';
+        if (!empty($ground_truth) || !empty($product_image_b64)) {
+            $ground_truth_rule = "
+*** الزامات حیاتی و قطعی حقیقت بالینی محصول (Clinical Ground Truth & Zero-Hallucination) ***:
+کاربر اطلاعات موثق و قطعی محصول (دوزها، ترکیبات، شکل دارویی مانند ویال خوراکی، ساشه، قرص یا کپسول، و نحوه مصرف) را به صورت متن یا تصویر بارگذاری کرده است.
+قوانین غیرقابل نقض:
+۱. شما موظفید ۱۰۰٪ و بدون کوچک‌ترین دخل و تصرف، تمام اطلاعات دوزبندی، مقادیر میلی‌گرم/میکروگرم، ترکیبات فعال و شکل دارو را دقیقاً و عیناً مطابق با این مشخصات تنظیم نمایید.
+۲. هذیان و حدس زدن دوزها اکیداً ممنوع است. هیچ عدد یا ادعایی که در مشخصات قطعی یا تصویر نیامده را تولید نکنید.
+۳. در جدول مقادیر و ترکیبات (Supplement Facts) درون 'content'، مقادیر دقیق را دقیقاً طبق این ورودی‌ها بنویسید.
+";
+        }
+
         return "شما یک متخصص ارشد فارماکولوژی بالینی، نویسنده مقالات پزشکی تراز اول، و مشاور سئو پزشکی (Medical SEO & GEO Specialist) مطابق دستورالعمل‌های رسمی گوگل رنک‌مث (Rank Math) و فاکتورهای اعتماد E-E-A-T هستید.
+
+{$ground_truth_rule}
 
 {$type_instructions}
 
@@ -312,7 +329,7 @@ class Pharmacy_EEAT_AI_Service {
 }";
     }
 
-    private static function build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $sources_text, $clean_urls) {
+    private static function build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $sources_text, $clean_urls) {
         $prompt = "لطفاً با توجه به استراتژی‌های مدرن تعیین‌شده، محتوای تخصصی زیر را تدوین کرده و در قالب شیء JSON خواسته شده تحویل دهید:\n\n";
         $prompt .= "- نوع سند: " . $content_type . "\n";
         $prompt .= "- موضوع / نام دارو یا محصول: " . ($topic ? $topic : 'بر اساس منابع ورودی') . "\n";
@@ -323,6 +340,13 @@ class Pharmacy_EEAT_AI_Service {
         $prompt .= "- استراتژی تصویر برند و تمایز رقابتی: " . $brand_image_strategy . "\n";
         $prompt .= "- حجم تقریبی متن: " . $word_count . " کلمه\n";
         $prompt .= "- مخاطب هدف: " . $target_audience . "\n";
+
+        if (!empty($ground_truth)) {
+            $prompt .= "\n\n*** مشخصات بالینی قطعی و واقعی محصول (دوز دقیق، ترکیبات و شکل دارویی - منع مطلق هذیان) ***:\n" . $ground_truth . "\n(تمام دوزها، مقادیر میلی‌گرم، ترکیبات و نحوه مصرف باید ۱۰۰٪ منطبق با این متن باشند.)\n";
+        }
+        if (!empty($product_image_b64)) {
+            $prompt .= "\n\n*** تصویر بروشور / جعبه محصول ضمیمه شده است ***:\nلطفاً تمام اطلاعات دوزبندی، جدول ترکیبات (Supplement Facts)، فرم دارویی (ویال/کپسول) و دستور مصرف را با دقت بینایی (Multimodal Vision) مستقیماً از روی تصویر ضمیمه‌شده خوانده و مو به مو در جدول و متن درج نمایید.\n";
+        }
 
         if ($mode === 'multi_url' || $mode === 'translate') {
             $prompt .= "\n- ترکیب چندمنبعی (Multi-Source Synthesis & Fact-Checking): لطفاً داده‌های موجود در مراجع خارجی زیر را با دانش روز داروسازی تلفیق، اعتبارسنجی و به زبان فارسی فاخر و بومی تدوین نمایید:\n";
@@ -337,17 +361,35 @@ class Pharmacy_EEAT_AI_Service {
         return $prompt;
     }
 
-    private static function call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '') {
+    private static function call_openrouter($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '', $product_image_b64 = '') {
         $endpoint = !empty($proxy_base) ? rtrim($proxy_base, '/') . '/chat/completions' : 'https://openrouter.ai/api/v1/chat/completions';
+
+        $user_content = $user_prompt;
+        if (!empty($product_image_b64)) {
+            $user_content = array(
+                array(
+                    'type' => 'text',
+                    'text' => $user_prompt,
+                ),
+                array(
+                    'type'      => 'image_url',
+                    'image_url' => array(
+                        'url' => $product_image_b64,
+                    ),
+                ),
+            );
+        }
+
+        $temperature = !empty($product_image_b64) ? 0.2 : 0.4;
 
         $body_data = array(
             'model'    => $model,
             'messages' => array(
                 array('role' => 'system', 'content' => $system_instruction),
-                array('role' => 'user', 'content' => $user_prompt),
+                array('role' => 'user', 'content' => $user_content),
             ),
             'response_format' => array('type' => 'json_object'),
-            'temperature'     => 0.4,
+            'temperature'     => $temperature,
             'max_tokens'      => 8000,
         );
 
@@ -455,7 +497,7 @@ class Pharmacy_EEAT_AI_Service {
         return new WP_Error('api_error', 'خطا در ارتباط با اوپن‌روتر: ' . $last_error);
     }
 
-    private static function call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '') {
+    private static function call_gemini($api_key, $model, $system_instruction, $user_prompt, $proxy_base = '', $product_image_b64 = '') {
         $base = !empty($proxy_base) ? rtrim($proxy_base, '/') : 'https://generativelanguage.googleapis.com';
         $endpoint = "{$base}/v1beta/models/{$model}:generateContent?key={$api_key}";
 
@@ -466,6 +508,23 @@ class Pharmacy_EEAT_AI_Service {
             array('category' => 'HARM_CATEGORY_DANGEROUS_CONTENT', 'threshold' => 'BLOCK_NONE'),
         );
 
+        $user_parts = array(
+            array('text' => $user_prompt)
+        );
+
+        if (!empty($product_image_b64)) {
+            if (preg_match('/^data:([^;]+);base64,(.+)$/', $product_image_b64, $matches)) {
+                $user_parts[] = array(
+                    'inline_data' => array(
+                        'mime_type' => $matches[1],
+                        'data'      => $matches[2]
+                    )
+                );
+            }
+        }
+
+        $temperature = !empty($product_image_b64) ? 0.2 : 0.4;
+
         $body_data = array(
             'system_instruction' => array(
                 'parts' => array(
@@ -474,15 +533,13 @@ class Pharmacy_EEAT_AI_Service {
             ),
             'contents' => array(
                 array(
-                    'parts' => array(
-                        array('text' => $user_prompt)
-                    )
+                    'parts' => $user_parts
                 )
             ),
             'safetySettings' => $safety_settings,
             'generationConfig' => array(
                 'response_mime_type' => 'application/json',
-                'temperature'        => 0.4,
+                'temperature'        => $temperature,
                 'maxOutputTokens'    => 8192,
             )
         );
