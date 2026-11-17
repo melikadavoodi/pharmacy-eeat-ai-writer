@@ -968,10 +968,26 @@ jQuery(document).ready(function ($) {
         $('#pharmacy_ai_model_selector').val('google/gemini-2.5-flash').trigger('change');
         $('#pharmacy_custom_model').val('');
 
-        // Clear saved input draft
+        // Clear saved input draft & autosave
         try {
             localStorage.removeItem('pharmacy_ai_input_draft');
+            localStorage.removeItem('pharmacy_ai_autosave');
         } catch (e) {}
+
+        // Reset all result fields & stored data
+        currentGenerationData = {};
+        $('#res_post_title').val('');
+        $('#res_content_preview').html('');
+        $('#res_excerpt').val('');
+        $('#res_rank_math_title').val('');
+        $('#res_rank_math_desc').val('');
+        $('#res_rank_math_keyword').val('');
+        $('#res_brand_message').val('');
+        $('#res_beyond_value').val('');
+        $('#res_schema_json').val('');
+        $('#res_internal_links_list').empty();
+        $('.pharmacy-internal-links-box').hide();
+        $('#pharmacy-restore-banner').slideUp(200);
 
         // Hide result container
         $('#pharmacy-result-container').slideUp(250);
