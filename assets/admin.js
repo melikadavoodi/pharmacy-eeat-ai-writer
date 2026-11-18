@@ -448,7 +448,8 @@ jQuery(document).ready(function ($) {
                 action: 'pharmacy_ai_product_quick_action',
                 nonce: pharmacyAiData.nonce,
                 post_id: postId,
-                action_type: actionType
+                action_type: actionType,
+                secondary_keywords: $('#pharmacy_quick_secondary_keywords').val() || ''
             },
             success: function (res) {
                 $btn.prop('disabled', false).text(originalText);
@@ -950,6 +951,7 @@ jQuery(document).ready(function ($) {
         $('#pharmacy_topic').val('');
         $('#pharmacy_target_product').val('');
         $('#pharmacy_keyword').val('');
+        $('#pharmacy_secondary_keywords').val('');
         $('#pharmacy_ground_truth').val('');
         $('#pharmacy_source_text').val('');
         $('#pharmacy-urls-repeater .url-input-row:not(:first)').remove();
