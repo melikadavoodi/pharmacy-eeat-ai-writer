@@ -21,6 +21,7 @@ class Pharmacy_EEAT_AI_Service {
         $source_urls     = isset($params['source_urls']) ? (array) $params['source_urls'] : array();
         $source_text     = isset($params['source_text']) ? sanitize_textarea_field($params['source_text']) : '';
         $focus_keyword   = isset($params['focus_keyword']) ? sanitize_text_field($params['focus_keyword']) : '';
+        $secondary_keywords = isset($params['secondary_keywords']) ? sanitize_textarea_field($params['secondary_keywords']) : '';
         $word_count      = isset($params['word_count']) ? intval($params['word_count']) : 1500;
         $tone            = isset($params['tone']) ? sanitize_text_field($params['tone']) : 'medical_consultant';
         $brand_pov       = isset($params['brand_pov']) ? sanitize_text_field($params['brand_pov']) : 'first_plural';
@@ -57,8 +58,8 @@ class Pharmacy_EEAT_AI_Service {
             $fetched_sources_text = $source_text;
         }
 
-        $system_instruction = self::build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $reviewer_name, $reviewer_code, $disclaimer_txt);
-        $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $fetched_sources_text, $clean_urls);
+        $system_instruction = self::build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $reviewer_name, $reviewer_code, $disclaimer_txt, $secondary_keywords);
+        $user_prompt        = self::build_user_prompt($content_type, $mode, $topic, $focus_keyword, $secondary_keywords, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $fetched_sources_text, $clean_urls);
 
         $max_tokens = 4200;
         if ($word_count <= 600) {
@@ -128,7 +129,7 @@ class Pharmacy_EEAT_AI_Service {
         return mb_substr(trim($clean), 0, 10000);
     }
 
-    private static function build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $reviewer_name, $reviewer_code, $disclaimer_txt) {
+    private static function build_system_prompt($content_type, $tone, $brand_pov, $reading_level, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $reviewer_name, $reviewer_code, $disclaimer_txt, $secondary_keywords = '') {
         $tones_desc = array(
             'medical_consultant'   => 'مشاوره‌ای، دلسوزانه و امین داروخانه‌ای (همانند گفت‌وگوی صمیمانه، گرم و اطمینان‌بخش دکتر داروساز پشت پیشخوان با بیمار)',
             'clinical_evidence'    => 'بسیار علمی، بالینی، آکادمیک و متکی بر کارآزمایی‌های بالینی رسمی بدون مبالغه (Evidence-Based Medicine)',
@@ -379,12 +380,15 @@ class Pharmacy_EEAT_AI_Service {
 }";
     }
 
-    private static function build_user_prompt($content_type, $mode, $topic, $focus_keyword, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $sources_text, $clean_urls) {
+    private static function build_user_prompt($content_type, $mode, $topic, $focus_keyword, $secondary_keywords, $word_count, $target_audience, $tone, $seo_strategy, $brand_image_strategy, $ground_truth, $product_image_b64, $sources_text, $clean_urls) {
         $prompt = "لطفاً با توجه به استراتژی‌های مدرن تعیین‌شده، محتوای تخصصی زیر را تدوین کرده و در قالب شیء JSON خواسته شده تحویل دهید:\n\n";
         $prompt .= "- نوع سند: " . $content_type . "\n";
         $prompt .= "- موضوع / نام دارو یا محصول: " . ($topic ? $topic : 'بر اساس منابع ورودی') . "\n";
         if ($focus_keyword) {
             $prompt .= "- کلمه کلیدی کانونی (Focus Keyword): " . $focus_keyword . "\n";
+        }
+        if (!empty($secondary_keywords)) {
+            $prompt .= "- کلمات کلیدی مکمل، مترادف‌ها و سرفصل‌های الزامی کاربر (LSI & Target Headings):\n" . $secondary_keywords . "\n(دستور اکید سئو: این کلمات کلیدی یا سرفصل‌ها را حتماً به صورت کاملاً ارگانیک، طبیعی و هدفمند در دل عناوین H2/H3، متن پاراگراف‌ها یا بخش سوالات متداول به کار ببرید و به نیت جستجوی خریدار پاسخ دهید.)\n";
         }
         $prompt .= "- استراتژی محتوا: " . $seo_strategy . "\n";
         $prompt .= "- استراتژی تصویر برند و تمایز رقابتی: " . $brand_image_strategy . "\n";
