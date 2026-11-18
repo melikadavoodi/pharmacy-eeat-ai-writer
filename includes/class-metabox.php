@@ -29,6 +29,11 @@ class Pharmacy_EEAT_Metabox {
                     <span class="dashicons dashicons-cart" style="vertical-align: middle;"></span> دستیار هوشمند محصول ووکامرس:
                 </p>
 
+                <div style="margin-bottom: 10px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 6px; padding: 8px;">
+                    <label for="pharmacy_quick_secondary_keywords" style="font-size: 11.5px; font-weight: bold; display: block; margin-bottom: 4px; color: #166534;">کلمات کلیدی مکمل یا سرفصل‌ها (اختیاری):</label>
+                    <input type="text" id="pharmacy_quick_secondary_keywords" placeholder="مثال: قیمت، طریقه مصرف، عوارض، اصل و تقلبی..." style="width: 100%; font-size: 12px; border-radius: 4px;">
+                </div>
+
                 <button type="button" class="button button-primary pharmacy-quick-btn" id="btn-quick-fill-all-product" data-post-id="<?php echo esc_attr($post->ID); ?>" style="width: 100%; margin-bottom: 8px; text-align: center; background: #00a389; border-color: #008f77;">
                     <span class="dashicons dashicons-superhero" style="vertical-align: middle;"></span> تولید یکجای همه بخش‌ها (توضیحات + ویژگی‌ها + رنک‌مث)
                 </button>
