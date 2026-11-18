@@ -317,6 +317,20 @@ class Pharmacy_EEAT_Admin_Page {
                                 </div>
                             </div>
 
+                            <!-- Secondary Keywords / LSI & Custom Headings -->
+                            <div class="pharmacy-row" style="margin-top: 12px;">
+                                <div class="pharmacy-col" style="flex: 1 1 100%;">
+                                    <div class="pharmacy-field" style="background: #f8fafc; border: 1px dashed #cbd5e1; border-radius: 8px; padding: 10px 14px;">
+                                        <label for="pharmacy_secondary_keywords" style="display: flex; justify-content: space-between; align-items: center; font-weight: bold; margin-bottom: 5px; color: #1e293b;">
+                                            <span><span class="dashicons dashicons-tag" style="vertical-align: middle; color: #0284c7;"></span> کلمات کلیدی مکمل، مترادف‌ها یا سرفصل‌های مدنظر (LSI & Target Search Phrases):</span>
+                                            <span style="font-weight: normal; font-size: 11px; color: #64748b;">(اختیاری - با ویرگول یا کاما جدا کنید)</span>
+                                        </label>
+                                        <input type="text" id="pharmacy_secondary_keywords" name="secondary_keywords" placeholder="مثال: قیمت ویال کلاژن مکس، نحوه مصرف با صبحانه، تفاوت با ساشه کلاژن، آیا چاق کننده است، تشخیص اصل و تقلبی" class="regular-text" style="width: 100%; border-radius: 6px;">
+                                        <p class="description" style="margin-top: 4px; font-size: 11.5px; color: #64748b;">🎯 هوش مصنوعی این کلمات و سرفصل‌ها را به صورت کاملاً ارگانیک در دل عناوین H2/H3، پاراگراف‌ها یا بخش سوالات متداول پوشش می‌دهد. در صورت خالی بودن، کلمات برتر جستجوشده به صورت خودکار تدوین می‌شوند.</p>
+                                    </div>
+                                </div>
+                            </div>
+
                             <!-- AI Engine & Model Comparative Selector (v4.0.0) -->
                             <div class="pharmacy-row" style="background: #faf5ff; padding: 12px 14px; border-radius: 8px; border: 1px solid #e9d5ff; margin-bottom: 16px;">
                                 <div class="pharmacy-col" style="flex: 1 1 100%;">
