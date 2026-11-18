@@ -3,7 +3,7 @@
  * Plugin Name: دستیار هوشمند محتوای داروخانه و سئو (Pharmacy Content AI Pro)
  * Plugin URI: https://drdarabipharmacy.com
  * Description: سیستم پیشرفته تولید محتوای مقالات بلاگ، محصولات ووکامرس و دسته‌بندی‌ها با متدولوژی‌های GEO (هوش مصنوعی گوگل)، CRO، کپی‌رایتینگ AIDA/PAS، استانداردهای بالینی E-E-A-T، ماتریس ۶ گانه تصویر برند فیلیپ کاتلر، تمایز فراتر از محصول و مراجع کلیک‌خور PubMed/Mayo Clinic.
- * Version: 4.2.0
+ * Version: 4.2.1
  * Author: تیم سئو و هوش مصنوعی دارابی
  * Author URI: https://drdarabipharmacy.com
  * Text Domain: pharmacy-eeat-ai
@@ -17,7 +17,7 @@ if (!defined('ABSPATH')) {
     exit;
 }
 
-define('PHARMACY_EEAT_VERSION', '4.2.0');
+define('PHARMACY_EEAT_VERSION', '4.2.1');
 define('PHARMACY_EEAT_PATH', plugin_dir_path(__FILE__));
 define('PHARMACY_EEAT_URL', plugin_dir_url(__FILE__));
 
@@ -223,6 +223,7 @@ class Pharmacy_EEAT_Plugin {
             'source_urls'     => $source_urls,
             'source_text'     => sanitize_textarea_field($_POST['source_text'] ?? ''),
             'focus_keyword'   => sanitize_text_field($_POST['focus_keyword'] ?? ''),
+            'secondary_keywords' => sanitize_textarea_field($_POST['secondary_keywords'] ?? ''),
             'word_count'      => intval($_POST['word_count'] ?? 1500),
             'tone'            => $tone,
             'brand_pov'            => sanitize_text_field($_POST['brand_pov'] ?? 'first_plural'),
@@ -381,11 +382,14 @@ class Pharmacy_EEAT_Plugin {
             wp_send_json_error('محصول یافت نشد.');
         }
 
+        $secondary_keywords = sanitize_text_field($_POST['secondary_keywords'] ?? '');
+
         $params = array(
             'content_type'    => 'product',
             'mode'            => 'topic',
             'topic'           => $post->post_title,
             'focus_keyword'   => get_post_meta($post_id, 'rank_math_focus_keyword', true) ?: $post->post_title,
+            'secondary_keywords' => $secondary_keywords,
             'word_count'      => 800,
             'tone'            => 'commercial_buyer',
             'seo_strategy'    => 'cro_conversion',
